@@ -1,10 +1,11 @@
-databricks:
+edbi:
   target: prod
   outputs:
     prod:
       type: databricks
-      method: oauth
-      host: https://dbc-fdf165e1-e5b0.cloud.databricks.com
       catalog: main
       schema: default
-      threads: 1
+      host: dbc-fdf165e1-e5b0.cloud.databricks.com
+      http_path: /sql/1.0/warehouses/a915d47ab9a08deb
+      auth_type: oauth
+      threads: 4
