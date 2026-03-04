@@ -1,0 +1,10 @@
+databricks:
+  target: prod
+  outputs:
+    prod:
+      type: databricks
+      method: oauth
+      host: https://dbc-fdf165e1-e5b0.cloud.databricks.com
+      catalog: main
+      schema: default
+      threads: 1
