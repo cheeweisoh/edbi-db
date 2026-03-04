@@ -1,0 +1,23 @@
+name: 'edbi'
+version: '1.0.0'
+
+profile: 'databricks'
+
+model-paths: ["models"]
+target-path: "target"
+clean-targets: ["target"]
+# analysis-paths: ["analyses"]
+# test-paths: ["tests"]
+# seed-paths: ["seeds"]
+# macro-paths: ["macros"]
+# snapshot-paths: ["snapshots"]
+
+models:
+  edbi:
+    +materialized: table
+    bronze:
+      +schema: bronze
+    silver:
+      +schema: silver
+    gold:
+      +schema: gold
