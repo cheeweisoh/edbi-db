@@ -1,7 +1,7 @@
-name: 'edbi'
-version: '1.0.0'
+name: "edbi"
+version: "1.0.0"
 
-profile: 'databricks'
+profile: "databricks"
 
 model-paths: ["models"]
 target-path: "target"
@@ -14,10 +14,15 @@ clean-targets: ["target"]
 
 models:
   edbi:
-    +materialized: table
     bronze:
       +schema: bronze
+      +materialized: incremental
+      +tags: ["bronze"]
     silver:
       +schema: silver
+      +materialized: incremental
+      +tags: ["silver"]
     gold:
       +schema: gold
+      +materialized: table
+      +tags: ["gold"]
