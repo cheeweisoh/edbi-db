@@ -1,7 +1,8 @@
 {{ config(
     materialized='incremental',
     incremental_strategy='append',
-    partition_by='_file_date'
+    partition_by='_file_date',
+    on_schema_change='fail'
 ) }}
 
 WITH source AS (
