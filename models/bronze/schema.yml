@@ -1,0 +1,22 @@
+version: 1
+
+models:
+  - name: ext_criliti_sc
+    description: "Deduplicated + Validated Raw Metadata for SC Court Cases"
+    columns:
+      - name: case_no
+        description: "Business key identifying the court case"
+        tests:
+          - not_null
+      - name: case_pid
+        description: "Primary key identifying the court case process instance"
+        tests:
+          - not_null
+      - name: _file_date
+        description: "Date (YYYYMMDD) extracted from the source filename"
+        tests:
+          - not_null
+      - name: _ingested_at
+        description: "Timestamp when the record was ingested into landing"
+        tests:
+          - not_null
