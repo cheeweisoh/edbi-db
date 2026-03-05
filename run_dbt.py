@@ -1,42 +1,51 @@
-import os
-import subprocess
+import runpy
 import sys
-import shutil
+import os
+import logging
 
-subprocess.run([sys.executable, "-m", "pip", "install", "dbt-databricks>=1.7,<2.0", "--quiet"], check=True)
-
-PROJECT_DIR = "/Workspace/Repos/soh_chee_wei@agc.gov.sg/edbi-db/"
+PROJECT_DIR = "/Workspace/Users/soh_chee_wei@agc.gov.sg/edbi-db/"
 PROFILES_DIR = PROJECT_DIR
 
+DEBUG = True
 
-dbt_bin = shutil.which("dbt")
-if not dbt_bin:
-    # Fall back to the venv bin path if 'which' can't find it
-    dbt_bin = os.path.join(os.path.dirname(sys.executable), "dbt")
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger("run_dbt")
 
-print(f"Using dbt binary: {dbt_bin}")
+if "DATABRICKS_TOKEN" not in os.environ:
+    logger.warning("DATABRICKS_TOKEN not found. Make sure OAuth is enabled on your job cluster.")
 
+def run_dbt_command(command: str):
+    """
+    Run a dbt command via Python module instead of subprocess.
+    command: e.g., "run", "test", "debug"
+    """
+    logger.info(f">>> Running dbt {command}")
 
-def run(cmd):
-    print(f"\n>>> dbt {cmd}")
-    result = subprocess.run(
-        [
-            dbt_bin,
-            cmd,
-            "--project-dir",
-            PROJECT_DIR,
-            "--profiles-dir",
-            PROFILES_DIR,
-            "--no-use-colors",
-        ],
-        text=True,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT,
-    )
-    print(result.stdout)
-    if result.returncode != 0:
-        raise SystemExit(f"dbt {cmd} failed (exit {result.returncode})")
+    args = [
+        command,
+        "--project-dir", PROJECT_DIR,
+        "--profiles-dir", PROFILES_DIR,
+        "--no-use-colors"
+    ]
 
+    if DEBUG:
+        args.append("--debug")
 
-run("run")
-run("test")
+    sys.argv = args
+
+    try:
+        runpy.run_module("dbt.main", run_name="__main__")
+    except SystemExit as e:
+        if e.code != 0:
+            logger.error(f"dbt {command} failed with exit code {e.code}")
+            raise
+    except Exception as e:
+        logger.exception(f"Error running dbt {command}: {e}")
+        raise
+
+if __name__ == "__main__":
+    run_dbt_command("debug")
+    run_dbt_command("run")
+    run_dbt_command("test")
+
+    logger.info("dbt run completed successfully!")
