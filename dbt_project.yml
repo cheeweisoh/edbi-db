@@ -15,14 +15,17 @@ clean-targets: ["target"]
 models:
   edbi:
     bronze:
+      +database: edbi_teamg01
       +schema: bronze
       +materialized: incremental
       +tags: ["bronze"]
     silver:
+      +database: edbi_teamg01
       +schema: silver
       +materialized: incremental
       +tags: ["silver"]
     gold:
+      +database: edbi_teamg01
       +schema: gold
       +materialized: table
       +tags: ["gold"]

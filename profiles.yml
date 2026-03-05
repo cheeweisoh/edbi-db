@@ -1,11 +1,11 @@
 databricks:
   target: prod
   outputs:
-    prod:
+    databricks_cluster:
       type: databricks
-      catalog: main
+      catalog: edbi_teamg01
       schema: default
       host: dbc-fdf165e1-e5b0.cloud.databricks.com
       http_path: /sql/1.0/warehouses/a915d47ab9a08deb
       token: "{{ env_var('DATABRICKS_TOKEN') }}"
-      threads: 4
+      threads: 1
