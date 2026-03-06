@@ -6,7 +6,7 @@ ext_criliti_sc,casestatus,case_status,STRING,true,true
 ext_criliti_sc,casetitle,case_title,STRING,true,true
 ext_criliti_sc,directorate,directorate,STRING,true,true
 ext_criliti_sc,division,division,STRING,true,true
-ext_criliti_sc,dob,accused_dob,DATE,true,true
+ext_criliti_sc,dob,accused_dob,STRING,true,true
 ext_criliti_sc,gender,accused_gender,STRING,true,true
 ext_criliti_sc,Q_IODETAILS,Q_IODETAILS,STRING,true,true
 ext_criliti_sc,_source_file,_source_file,STRING,true,true

@@ -40,3 +40,34 @@ models:
           - not_null
       - name: _bronze_loaded_at
         description: "Timestamp when the record was ingested into bronze"
+        tests:
+          - not_null
+  - name: cmplx_criliti_sc_assigned_lo
+    description: "Deduplicated + Validated Raw Metadata for Officers Assigned to Court Cases"
+    columns:
+      - name: case_pid
+        description: "Primary key identifying the court case process instance"
+      - name: cluster
+        description: "Cluster of the assigned officer"
+      - name: name
+        description: "Name of the assigned officer"
+      - name: officer_id
+        description: "Business key identifying the officer"
+      - name: team
+        description: "Team of the assigned officer"
+      - name: _rescued_data
+        description: "JSON list of columns with data issues"
+      - name: _source_file
+        description: "Name of source file that data comes from"
+      - name: _file_date
+        description: "Date (YYYYMMDD) extracted from the source filename"
+        tests:
+          - not_null
+      - name: _ingested_at
+        description: "Timestamp when the record was ingested into landing"
+        tests:
+          - not_null
+      - name: _bronze_loaded_at
+        description: "Timestamp when the record was ingested into bronze"
+        tests:
+          - not_null

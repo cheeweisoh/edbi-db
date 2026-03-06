@@ -8,4 +8,4 @@
     on_schema_change='fail'
 ) }}
 
-{{ generate_bronze_table('ext_criliti_sc') }}
+{{ generate_bronze_table('cmplx_criliti_sc_assigned_lo') }}

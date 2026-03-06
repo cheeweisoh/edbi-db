@@ -1,6 +1,6 @@
 from pyspark.sql.functions import col, current_timestamp, regexp_extract
 
-VOLUME_ROOT = "/Volumes/edbi_teamg01"
+VOLUME_ROOT = "/Volumes/edbi_teamg01/landing"
 CATALOG = "edbi_teamg01"
 
 

@@ -46,10 +46,13 @@
 
     validated as (
         select
-            * exclude (_row_num),
+            {%- set all_columns = adapter.get_columns_in_relation(source('landing', source_name)) -%}
+            {%- for col in all_columns if col.name != '_row_num' %}
+            {{ col.name }},
+            {%- endfor %}
             case
                 {% for key in key_columns %}
-                when {{ key }} is null then 'missing_{{ key | trim }}'
+                when {{ key | trim }} is null then 'missing_{{ key | trim }}'
                 {% endfor %}
                 {% for row in col_rows %}
                 {% if row['nullable'] | string | lower == 'false' %}

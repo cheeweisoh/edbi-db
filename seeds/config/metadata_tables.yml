@@ -1,10 +1,13 @@
 version: 1
 
 seeds:
-  - name: ingestion_metadata
+  - name: metadata_tables
     config:
       database: edbi_teamg01
       schema: config
+      contract:
+        enforced: true
+    meta:
       contract:
         enforced: true
     columns:
@@ -29,7 +32,8 @@ seeds:
         tests:
           - not_null
           - accepted_values:
-              values: ['csv', 'parquet', 'json']
+              arguments:
+                values: ['csv', 'parquet', 'json']
       - name: date_pattern
         data_type: string
         constraints:
