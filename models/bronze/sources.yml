@@ -47,6 +47,8 @@ sources:
         columns:
           - name: pid
             description: "Primary key identifying the court case process instance"
+            tests:
+              - not_null
           - name: cluster
             description: "Cluster of the assigned officer"
           - name: name
@@ -55,6 +57,124 @@ sources:
             description: "Business key identifying the officer"
           - name: team
             description: "Team of the assigned officer"
+          - name: _rescued_data
+            description: "JSON list of columns with data issues"
+          - name: _source_file
+            description: "Name of source file that data comes from"
+          - name: _file_date
+            description: "Date (YYYYMMDD) extracted from the source filename"
+            tests:
+              - not_null
+          - name: _ingested_at
+            description: "Timestamp when the record was ingested into landing"
+            tests:
+              - not_null
+      - name: cmplx_criliti_sc_charge_dtls
+        description: "Raw Metadata for Charges to the Court Case"
+        columns:
+          - name: pid
+            description: "Primary key for identifying the court case process instance"
+            tests:
+              - not_null
+          - name: chargeno
+            description: ""
+          - name: chargetype
+            description: ""
+          - name: chargestatus
+            description: ""
+          - name: offencedt
+            description: ""
+          - name: filingdt
+            description: ""
+          - name: _rescued_data
+            description: "JSON list of columns with data issues"
+          - name: _source_file
+            description: "Name of source file that data comes from"
+          - name: _file_date
+            description: "Date (YYYYMMDD) extracted from the source filename"
+            tests:
+              - not_null
+          - name: _ingested_at
+            description: "Timestamp when the record was ingested into landing"
+            tests:
+              - not_null
+      - name: cmplx_criliti_sc_offence
+        description: "Raw Metadata for Offence Information to the Charge"
+        columns:
+          - name: pid
+            description: "Primary key for identifying the court case process instance"
+            tests:
+              - not_null
+          - name: chargeno
+            description: ""
+          - name: acttitle
+            description: ""
+          - name: reference
+            description: ""
+          - name: rwpubase
+            description: ""
+            tests:
+              - not_null
+          - name: description_ntext
+            description: ""
+          - name: _rescued_data
+            description: "JSON list of columns with data issues"
+          - name: _source_file
+            description: "Name of source file that data comes from"
+          - name: _file_date
+            description: "Date (YYYYMMDD) extracted from the source filename"
+            tests:
+              - not_null
+          - name: _ingested_at
+            description: "Timestamp when the record was ingested into landing"
+            tests:
+              - not_null
+      - name: tb_criliti_sc_court_events
+        description: "Raw Metadata for Court Events"
+        columns:
+          - name: startdtstr
+            description: ""
+          - name: pid
+            description: "Primary key for identifying the court case process instance"
+            tests:
+              - not_null
+          - name: id
+            description: ""
+            tests:
+              - not_null
+          - name: courtnumber
+            description: ""
+          - name: courteventtype
+            description: ""
+          - name: courteventstatus
+            description: ""
+          - name: _rescued_data
+            description: "JSON list of columns with data issues"
+          - name: _source_file
+            description: "Name of source file that data comes from"
+          - name: _file_date
+            description: "Date (YYYYMMDD) extracted from the source filename"
+            tests:
+              - not_null
+          - name: _ingested_at
+            description: "Timestamp when the record was ingested into landing"
+            tests:
+              - not_null
+      - name: tb_criliti_sc_court_event_off
+        description: "Raw Metadata for Officers Assigned to each Court Event"
+        columns:
+          - name: courteventid
+            description: ""
+            tests:
+              - not_null
+          - name: officerid
+            description: ""
+            tests:
+              - not_null
+          - name: name
+            description: ""
+          - name: division
+            description: ""
           - name: _rescued_data
             description: "JSON list of columns with data issues"
           - name: _source_file

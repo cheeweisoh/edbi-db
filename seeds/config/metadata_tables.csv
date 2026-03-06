@@ -1,3 +1,7 @@
 source_name,subfolder,file_format,date_pattern,natural_key,active
 ext_criliti_sc,iw/ext_criliti_sc,csv,(\d{8})\.csv,casepid,true
 cmplx_criliti_sc_assigned_lo,iw/cmplx_criliti_sc_assigned_lo,csv,(\d{8})\.csv,"pid,officerid",true
+cmplx_criliti_sc_charge_dtls,iw/cmplx_criliti_sc_charge_dtls,csv,(\d{8})\.csv,"pid,chargeno",true
+cmplx_criliti_sc_offence,iw/cmplx_criliti_sc_offence,csv,(\d{8})\.csv,"pid,chargeno,acttitle,reference,rwpubase",true
+tb_criliti_sc_court_events,iw/tb_criliti_sc_court_events,csv,(\d{8})\.csv,"pid,id",true
+tb_criliti_sc_court_event_off,iw/tb_criliti_sc_court_event_off,csv,(\d{8})\.csv,"courteventid,officerid",true

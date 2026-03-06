@@ -47,14 +47,150 @@ models:
     columns:
       - name: case_pid
         description: "Primary key identifying the court case process instance"
+        tests:
+          - not_null
       - name: cluster
         description: "Cluster of the assigned officer"
-      - name: name
+      - name: officer_name
         description: "Name of the assigned officer"
       - name: officer_id
         description: "Business key identifying the officer"
+        tests:
+          - not_null
       - name: team
         description: "Team of the assigned officer"
+      - name: _rescued_data
+        description: "JSON list of columns with data issues"
+      - name: _source_file
+        description: "Name of source file that data comes from"
+      - name: _file_date
+        description: "Date (YYYYMMDD) extracted from the source filename"
+        tests:
+          - not_null
+      - name: _ingested_at
+        description: "Timestamp when the record was ingested into landing"
+        tests:
+          - not_null
+      - name: _bronze_loaded_at
+        description: "Timestamp when the record was ingested into bronze"
+        tests:
+          - not_null
+  - name: cmplx_criliti_sc_charge_dtls
+    description: "Deduplicated + Validated Raw Metadata for Charges to the Court Case"
+    columns:
+      - name: case_pid
+        description: "Primary key identifying the court case process instance"
+        tests:
+          - not_null
+      - name: charge_no
+        description: ""
+      - name: charge_type
+        description: ""
+      - name: charge_status
+        description: ""
+      - name: offence_date
+        description: ""
+      - name: filing_date
+        description: ""
+      - name: _rescued_data
+        description: "JSON list of columns with data issues"
+      - name: _source_file
+        description: "Name of source file that data comes from"
+      - name: _file_date
+        description: "Date (YYYYMMDD) extracted from the source filename"
+        tests:
+          - not_null
+      - name: _ingested_at
+        description: "Timestamp when the record was ingested into landing"
+        tests:
+          - not_null
+      - name: _bronze_loaded_at
+        description: "Timestamp when the record was ingested into bronze"
+        tests:
+          - not_null
+  - name: cmplx_criliti_sc_offence
+    description: "Deduplicated + Validated Raw Metadata for Offence Information to the Charge"
+    columns:
+      - name: case_pid
+        description: "Primary key identifying the court case process instance"
+        tests:
+          - not_null
+      - name: charge_no
+        description: ""
+      - name: act_title
+        description: ""
+      - name: reference
+        description: ""
+      - name: rwpu_base
+        description: ""
+      - name: description
+        description: ""
+      - name: _rescued_data
+        description: "JSON list of columns with data issues"
+      - name: _source_file
+        description: "Name of source file that data comes from"
+      - name: _file_date
+        description: "Date (YYYYMMDD) extracted from the source filename"
+        tests:
+          - not_null
+      - name: _ingested_at
+        description: "Timestamp when the record was ingested into landing"
+        tests:
+          - not_null
+      - name: _bronze_loaded_at
+        description: "Timestamp when the record was ingested into bronze"
+        tests:
+          - not_null
+  - name: tb_criliti_sc_court_events
+    description: "Deduplicated + Validated Raw Metadata for Court Events"
+    columns:
+      - name: start_datetime
+        description: ""
+      - name: case_pid
+        description: "Primary key identifying the court case process instance"
+        tests:
+          - not_null
+      - name: court_event_id
+        description: ""
+        tests:
+          - not_null
+      - name: court_number
+        description: ""
+      - name: court_event_type
+        description: ""
+      - name: court_event_status
+        description: ""
+      - name: _rescued_data
+        description: "JSON list of columns with data issues"
+      - name: _source_file
+        description: "Name of source file that data comes from"
+      - name: _file_date
+        description: "Date (YYYYMMDD) extracted from the source filename"
+        tests:
+          - not_null
+      - name: _ingested_at
+        description: "Timestamp when the record was ingested into landing"
+        tests:
+          - not_null
+      - name: _bronze_loaded_at
+        description: "Timestamp when the record was ingested into bronze"
+        tests:
+          - not_null
+  - name: tb_criliti_sc_court_event_off
+    description: "Deduplicated + Validated Raw Metadata for Officers Assigned to each Court Event"
+    columns:
+      - name: court_event_id
+        description: ""
+        tests:
+          - not_null
+      - name: officer_id
+        description: ""
+        tests:
+          - not_null
+      - name: officer_name
+        description: ""
+      - name: officer_division
+        description: ""
       - name: _rescued_data
         description: "JSON list of columns with data issues"
       - name: _source_file
