@@ -4,6 +4,8 @@ models:
   - name: ext_criliti_sc
     description: "Deduplicated + Validated Raw Metadata for SC Court Cases"
     columns:
+      - name: accused_name
+        description: "Name of accused person involved in the court case"
       - name: case_no
         description: "Business key identifying the court case"
         tests:
@@ -12,11 +14,29 @@ models:
         description: "Primary key identifying the court case process instance"
         tests:
           - not_null
+      - name: case_status
+        description: "Status of court case"
+      - name: case_title
+        description: "Title of court case"
+      - name: directorate
+        description: "Cluster and Team in charge of the court case"
+      - name: accused_dob
+        description: "Date of birth of accused person involved in the court case"
+      - name: accused_gender
+        description: "Gender of accused person involved in the court case"
+      - name: Q_IODETAILS
+        description: "JSON list of Investigation Officers"
+      - name: _source_file
+        description: "Name of source file that data comes from"
       - name: _file_date
         description: "Date (YYYYMMDD) extracted from the source filename"
         tests:
           - not_null
+      - name: _rejected_reason
+        description: "Reason why row was rejected"
       - name: _ingested_at
         description: "Timestamp when the record was ingested into landing"
         tests:
           - not_null
+      - name: _bronze_loaded_at
+        description: "Timestamp when the record was ingested into bronze"

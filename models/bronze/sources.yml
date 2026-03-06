@@ -8,6 +8,8 @@ sources:
       - name: ext_criliti_sc
         description: "Raw Metadata for SC Court Cases"
         columns:
+          - name: accusedname
+            description: "Name of accused person involved in the court case"
           - name: caseno
             description: "Business key identifying the court case"
             tests:
@@ -16,6 +18,20 @@ sources:
             description: "Primary key identifying the court case process instance"
             tests:
               - not_null
+          - name: casestatus
+            description: "Status of court case"
+          - name: casetitle
+            description: "Title of court case"
+          - name: directorate
+            description: "Cluster and Team in charge of the court case"
+          - name: dob
+            description: "Date of birth of accused person involved in the court case"
+          - name: gender
+            description: "Gender of accused person involved in the court case"
+          - name: Q_IODETAILS
+            description: "JSON list of Investigation Officers"
+          - name: _source_file
+            description: "Name of source file that data comes from"
           - name: _file_date
             description: "Date (YYYYMMDD) extracted from the source filename"
             tests:
