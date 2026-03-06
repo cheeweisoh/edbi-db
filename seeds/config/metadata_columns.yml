@@ -2,7 +2,6 @@ version: 1
 
 seeds:
   - name: column_metadata
-    description: "Column-level casting and renaming rules per source"
     config:
       database: edbi_teamg01
       schema: config

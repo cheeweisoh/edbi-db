@@ -4,7 +4,7 @@ VOLUME_ROOT = "/Volumes/edbi_teamg01"
 CATALOG = "edbi_teamg01"
 
 
-metadata = spark.table(f"{CATALOG}.default.metadata_tables").filter(col("active")).collect()
+metadata = spark.table(f"{CATALOG}.config.metadata_tables").filter(col("active")).collect()
 
 for row in metadata:
     source_name = row["source_name"]
