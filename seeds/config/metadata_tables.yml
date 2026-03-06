@@ -1,0 +1,50 @@
+version: 1
+
+seeds:
+  - name: ingestion_metadata
+    config:
+      database: edbi_teamg01
+      schema: config
+      contract:
+        enforced: true
+    columns:
+      - name: source_name
+        data_type: string
+        constraints:
+          - type: not_null
+        tests:
+          - unique
+          - not_null
+      - name: subfolder
+        data_type: string
+        constraints:
+          - type: not_null
+        tests:
+          - not_null
+          - unique
+      - name: file_format
+        data_type: string
+        constraints:
+          - type: not_null
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['csv', 'parquet', 'json']
+      - name: date_pattern
+        data_type: string
+        constraints:
+          - type: not_null
+        tests:
+          - not_null
+      - name: natural_key
+        data_type: string
+        constraints:
+          - type: not_null
+        tests:
+          - not_null
+      - name: active
+        data_type: boolean
+        constraints:
+          - type: not_null
+        tests:
+          - not_null
