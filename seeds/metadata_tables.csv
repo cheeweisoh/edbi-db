@@ -1,3 +1,3 @@
-source_name,subfolder,file_format,data_pattern,natural_key,active
+source_name,subfolder,file_format,date_pattern,natural_key,active
 ext_criliti_sc,iw/ext_criliti_sc,csv,(\d{8})\.csv,casepid,true
 cmplx_criliti_sc_assigned_lo,iw/cmplx_criliti_sc_assigned_lo,csv,(\d{8})\.csv,"pid,officerid",true
