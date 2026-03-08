@@ -1,0 +1,19 @@
+version: 2
+
+sources:
+  - name: landing
+    database: edbi_teamg01
+    schema: landing
+    tables:
+      - name: ext_criliti_sc
+        description: "Raw Metadata for SC Court Cases"
+      - name: cmplx_criliti_sc_assigned_lo
+        description: "Raw Metadata for Officers Assigned to Court Cases"
+      - name: cmplx_criliti_sc_charge_dtls
+        description: "Raw Metadata for Charges to the Court Case"
+      - name: cmplx_criliti_sc_offence
+        description: "Raw Metadata for Offence Information to the Charge"
+      - name: tb_criliti_sc_court_events
+        description: "Raw Metadata for Court Events"
+      - name: tb_criliti_sc_court_event_off
+        description: "Raw Metadata for Officers Assigned to each Court Event"
