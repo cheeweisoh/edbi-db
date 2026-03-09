@@ -1,0 +1,185 @@
+version: 2
+
+models:
+  - name: dim_date
+    description: "Dimension Table for Dates"
+    columns:
+      - name: date_skey
+        description: ""
+        tests:
+          - not_null
+          - unique
+      - name: full_date
+        description: ""
+      - name: day
+        description: ""
+      - name: month
+        description: ""
+      - name: quarter
+        description: ""
+      - name: year
+        description: ""
+      - name: day_of_week
+        description: ""
+      - name: is_workday
+        description: ""
+      - name: reporting_month
+        description: ""
+  - name: dim_person
+    description: "Dimension Table for Persons (Accused and Victim)"
+    columns:
+      - name: person_skey
+        description: ""
+        tests:
+          - not_null
+          - unique
+      - name: full_name
+        description: ""
+      - name: gender
+        description: ""
+      - name: date_of_birth
+        description: ""
+  - name: dim_officer
+    description: "Dimension Table for Officers (Assigned and Attending)"
+    columns:
+      - name: officer_skey
+        description: ""
+        tests:
+          - not_null
+          - unique
+      - name: full_name
+        description: ""
+      - name: officer_cluster
+        description: ""
+      - name: officer_team
+        description: ""
+      - name: row_start_date
+        description: ""
+      - name: row_end_date
+        description: ""
+  - name: dim_case
+    description: "Dimension Table for Case"
+    columns:
+      - name: case_skey
+        description: ""
+        tests:
+          - not_null
+          - unique
+      - name: accused_skey
+        description: ""
+        tests:
+          - not_null
+          - relationships:
+              to: ref("dim_person")
+              field: person_skey
+      - name: case_no
+        description: ""
+      - name: directorate
+        description: ""
+  - name: fact_case_officer
+    description: "Fact Table for Officers Assigned to Cases"
+    columns:
+      - name: case_skey
+        description: ""
+        tests:
+          - not_null
+          - unique
+          - relationships:
+              to: ref("dim_case")
+              field: case_skey
+      - name: officer_skey
+        description: ""
+        tests:
+          - relationships:
+              to: ref("dim_officer")
+              field: officer_skey
+      - name: assigned_from_date_skey
+        description: ""
+        tests:
+          - relationships:
+              to: ref("dim_date")
+              field: date_skey
+      - name: assigned_to_date_skey
+        description: ""
+        tests:
+          - relationships:
+              to: ref("dim_date")
+              field: date_skey
+      - name: first_mention_date_skey
+        description: ""
+        tests:
+          - relationships:
+              to: ref("dim_date")
+              field: date_skey
+      - name: case_status
+        description: ""
+      - name: case_type
+        description: ""
+      - name: first_mention_year
+        description: ""
+  - name: fact_event_officer
+    description: "Fact Table for Officers Attending Court Events"
+    columns:
+      - name: event_skey
+        description: ""
+        tests:
+          - not_null
+          - unique
+      - name: case_skey
+        description: ""
+        tests:
+          - relationships:
+              to: ref("dim_case")
+              field: case_skey
+      - name: officer_skey
+        description: ""
+        tests:
+          - relationships:
+              to: ref("dim_officer")
+              field: officer_skey
+      - name: court_event_type
+        description: ""
+      - name: court_event_date_skey
+        description: ""
+        tests:
+          - relationships:
+              to: ref("dim_date")
+              field: date_skey
+      - name: court_event_hearing_days
+        description: ""
+      - name: court_event_year
+        description: ""
+  - name: fact_case_charge
+    description: "Fact Table for Charges belonging to Cases"
+    columns:
+      - name: charge_skey
+        description: ""
+        tests:
+          - not_null
+          - unique
+      - name: case_skey
+        description: ""
+        tests:
+          - relationships:
+              to: ref("dim_case")
+              field: case_skey
+      - name: victim_skey
+        description: ""
+        tests:
+          - relationships:
+              to: ref("dim_person")
+              field: person_skey
+      - name: relation_to_accused
+        description: ""
+      - name: charge_status
+        description: ""
+      - name: commited_date_skey
+        description: ""
+        tests:
+          - relationships:
+              to: ref("dim_date")
+              field: date_skey
+      - name: offence_type
+        description: ""
+      - name: offence_group
+        description: ""
