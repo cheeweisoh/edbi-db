@@ -26,6 +26,8 @@ models:
         description: "Gender of accused person involved in the court case"
       - name: Q_IODETAILS
         description: "JSON list of Investigation Officers"
+      - name: _rescued_data
+        description: "JSON list of columns with data issues"
       - name: _source_file
         description: "Name of source file that data comes from"
       - name: _file_date
