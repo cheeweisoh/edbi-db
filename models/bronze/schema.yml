@@ -85,15 +85,15 @@ models:
         tests:
           - not_null
       - name: charge_no
-        description: ""
+        description: "Business key identifing the charge in the court case"
       - name: charge_type
-        description: ""
+        description: "Whether it is a District or Magistrate charge"
       - name: charge_status
-        description: ""
+        description: "Whether the charge is currently active or has been disposed"
       - name: offence_date
-        description: ""
+        description: "Date when the offence took place (YYYYMMDD)"
       - name: filing_date
-        description: ""
+        description: "Date when the charge was filed (YYYYMMDD)"
       - name: _rescued_data
         description: "JSON list of columns with data issues"
       - name: _source_file
@@ -118,15 +118,15 @@ models:
         tests:
           - not_null
       - name: charge_no
-        description: ""
+        description: "Business key identifying the charge in the court case"
       - name: act_title
-        description: ""
+        description: "Title of the act under which the accused is being charged"
       - name: reference
-        description: ""
+        description: "Section and/or sub-section of the act under which the accused is being charged"
       - name: rwpu_base
-        description: ""
+        description: "Whether it is the main offence, read-with offence, or punishable-under offence"
       - name: description
-        description: ""
+        description: "Description of the offence (act and reference) under which the accused is being charged"
       - name: _rescued_data
         description: "JSON list of columns with data issues"
       - name: _source_file
@@ -147,21 +147,23 @@ models:
     description: "Deduplicated + Validated Raw Metadata for Court Events"
     columns:
       - name: start_datetime
-        description: ""
+        description: "Start Date and Time (YYYYMMDD HH:MM) of court event"
+      - name: end_datetime
+        description: "End Date and Time (YYYYMMDD HH:MM) of court event"
       - name: case_pid
         description: "Primary key identifying the court case process instance"
         tests:
           - not_null
       - name: court_event_id
-        description: ""
+        description: "Primary key identifying the court event"
         tests:
           - not_null
       - name: court_number
-        description: ""
+        description: "Courtroom number where the court event took place"
       - name: court_event_type
-        description: ""
+        description: "Type of court event (e.g. First Mention, Plea, Trial, Sentencing etc)"
       - name: court_event_status
-        description: ""
+        description: "Whether the court event proceeded (new), was vacated or voided"
       - name: _rescued_data
         description: "JSON list of columns with data issues"
       - name: _source_file
@@ -182,17 +184,17 @@ models:
     description: "Deduplicated + Validated Raw Metadata for Officers Assigned to each Court Event"
     columns:
       - name: court_event_id
-        description: ""
+        description: "Primary key identifying the court event"
         tests:
           - not_null
       - name: officer_id
-        description: ""
+        description: "Primary key identifying the officer"
         tests:
           - not_null
       - name: officer_name
-        description: ""
+        description: "Name of the officer who attended the court event"
       - name: officer_division
-        description: ""
+        description: "Division to which the officer belongs"
       - name: _rescued_data
         description: "JSON list of columns with data issues"
       - name: _source_file
