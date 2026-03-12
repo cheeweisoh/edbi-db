@@ -1,5 +1,6 @@
 {{ config(
     materialized='table',
+    partition_by=['year'],
     tags=['silver']
 ) }}
 
