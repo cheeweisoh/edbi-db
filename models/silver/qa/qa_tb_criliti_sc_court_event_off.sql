@@ -11,7 +11,7 @@ WITH base AS (
         _bronze_loaded_at,
 
         -- quality flags
-        CASE WHEN officer_name IS NULL THEN true ELSE false AS _dq_missing_officer_name
+        CASE WHEN officer_name IS NULL THEN true ELSE false END AS _dq_missing_officer_name
     FROM {{ source('bronze', 'tb_criliti_sc_court_event_off') }}
     WHERE _rejected_reason IS NULL
 )

@@ -13,7 +13,7 @@ WITH base AS (
         _bronze_loaded_at,
 
         -- quality flags
-        CASE WHEN rwpu_base NOT IN ('M', 'P', 'R') THEN true ELSE false AS _dq_invalid_rwpu
+        CASE WHEN rwpu_base NOT IN ('M', 'P', 'R') THEN true ELSE false END AS _dq_invalid_rwpu
     FROM {{ source('bronze', 'cmplx_criliti_sc_offence') }}
     WHERE _rejected_reason IS NULL
 )

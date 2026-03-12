@@ -1,7 +1,7 @@
 WITH base AS (
     SELECT
         start_datetime,
-        end_dateime, 
+        end_datetime, 
         case_pid,
         court_event_id,
         court_number,
