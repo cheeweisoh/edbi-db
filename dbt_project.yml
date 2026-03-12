@@ -12,6 +12,15 @@ test-paths: ["tests"]
 # macro-paths: ["macros"]
 # snapshot-paths: ["snapshots"]
 
+seeds:
+  edbi:
+    config:
+      +database: edbi_teamg01
+      +schema: config
+    reference:
+      +database: edbi_teamg01
+      +schema: reference
+
 models:
   edbi:
     bronze:
