@@ -1,3 +1,12 @@
+{{ config (
+    materialized='incremental',
+    incremental_strategy='merge',
+    unique_key=['case_pid', 'charge_no', '_file_date'],
+    partition_by=['_file_date'],
+    on_schema_change='fail',
+    tags=['silver', 'qa']
+)}}
+
 WITH base AS (
     SELECT
         case_pid,
@@ -17,8 +26,11 @@ WITH base AS (
         CASE WHEN offence_date > CURRENT_DATE THEN true ELSE false END AS _dq_future_offence_date,
         CASE WHEN filing_date > CURRENT_DATE THEN true ELSE false END AS _dq_future_filing_date,
         CASE WHEN offence_date > filing_date THEN true ELSE false END AS _dq_filing_before_offence
-    FROM {{ source('bronze', 'cmplx_criliti_sc_charge_dtls') }}
+    FROM {{ ref('cmplx_criliti_sc_charge_dtls') }}
     WHERE _rejected_reason IS NULL
+    {% if is_incremental() %}
+        AND _bronze_loaded_at > (SELECT MAX(_bronze_loaded_at) FROM {{ this }})
+    {% endif %}
 )
 
 SELECT

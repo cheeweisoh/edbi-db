@@ -1,3 +1,12 @@
+{{ config (
+    materialized='incremental',
+    incremental_strategy='merge',
+    unique_key=['case_pid', 'officer_id', '_file_date'],
+    partition_by=['_file_date'],
+    on_schema_change='fail',
+    tags=['silver', 'qa']
+)}}
+
 WITH base AS (
     SELECT 
         case_pid,
@@ -13,8 +22,11 @@ WITH base AS (
 
         -- quality flags
         CASE WHEN officer_name IS NULL THEN true ELSE false END AS _dq_missing_officer_name
-    FROM {{ source('bronze', 'cmplx_criliti_sc_assigned_lo') }}
+    FROM {{ ref('cmplx_criliti_sc_assigned_lo') }}
     WHERE _rejected_reason IS NULL
+    {% if is_incremental() %}
+        AND _bronze_loaded_at > (SELECT MAX(_bronze_loaded_at) FROM {{ this }})
+    {% endif %}
 )
 
 SELECT

@@ -1,3 +1,12 @@
+{{ config (
+    materialized='incremental',
+    incremental_strategy='merge',
+    unique_key=['court_event_id', 'officer_id', '_file_date'],
+    partition_by=['_file_date'],
+    on_schema_change='fail',
+    tags=['silver', 'qa']
+)}}
+
 WITH base AS (
     SELECT
         court_event_id,
@@ -12,8 +21,11 @@ WITH base AS (
 
         -- quality flags
         CASE WHEN officer_name IS NULL THEN true ELSE false END AS _dq_missing_officer_name
-    FROM {{ source('bronze', 'tb_criliti_sc_court_event_off') }}
+    FROM {{ ref('tb_criliti_sc_court_event_off') }}
     WHERE _rejected_reason IS NULL
+    {% if is_incremental() %}
+        AND _bronze_loaded_at > (SELECT MAX(_bronze_loaded_at) FROM {{ this }})
+    {% endif %}
 )
 
 SELECT

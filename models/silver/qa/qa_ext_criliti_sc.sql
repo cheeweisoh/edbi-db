@@ -1,3 +1,12 @@
+{{ config (
+    materialized='incremental',
+    incremental_strategy='merge',
+    unique_key=['case_pid', '_file_date'],
+    partition_by=['_file_date'],
+    on_schema_change='fail',
+    tags=['silver', 'qa']
+)}}
+
 WITH base AS (
     SELECT
         accused_name,
@@ -17,8 +26,11 @@ WITH base AS (
         -- quality flags
         CASE WHEN accused_dob > CURRENT_DATE THEN true ELSE false END AS _dq_future_accused_dob,
         CASE WHEN accused_gender NOT IN ('M', 'F') THEN true ELSE false END AS _dq_invalid_gender
-    FROM {{ source('bronze', 'ext_criliti_sc') }}
+    FROM {{ ref('ext_criliti_sc') }}
     WHERE _rejected_reason IS NULL
+    {% if is_incremental() %}
+        AND _bronze_loaded_at > (SELECT MAX(_bronze_loaded_at) FROM {{ this }})
+    {% endif %}
 )
 
 SELECT
