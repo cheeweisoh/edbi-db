@@ -24,8 +24,9 @@ WITH base AS (
         _bronze_loaded_at,
 
         -- quality flags
-        CASE WHEN accused_dob > CURRENT_DATE THEN true ELSE false END AS _dq_future_accused_dob,
-        CASE WHEN accused_gender NOT IN ('M', 'F') THEN true ELSE false END AS _dq_invalid_gender
+        CASE WHEN accused_dob > CURRENT_DATE THEN false ELSE true END AS _dq_future_accused_dob,
+        CASE WHEN accused_gender NOT IN ('M', 'F') THEN false ELSE true END AS _dq_invalid_gender,
+        CASE WHEN _rescued_data IS NOT NULL THEN false ELSE true END AS _dq_rescued_data
     FROM {{ ref('ext_criliti_sc') }}
     WHERE _rejected_reason IS NULL
     {% if is_incremental() %}
@@ -38,6 +39,7 @@ SELECT
     CASE
         WHEN _dq_future_accused_dob = true THEN true
         WHEN _dq_invalid_gender = true THEN true
+        WHEN _dq_rescued_data = true THEN true
         ELSE false
     END AS is_valid_row
 FROM base

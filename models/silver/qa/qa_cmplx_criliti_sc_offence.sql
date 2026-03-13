@@ -22,7 +22,8 @@ WITH base AS (
         _bronze_loaded_at,
 
         -- quality flags
-        CASE WHEN rwpu_base NOT IN ('M', 'P', 'R') THEN true ELSE false END AS _dq_invalid_rwpu
+        CASE WHEN rwpu_base NOT IN ('M', 'P', 'R') THEN false ELSE true END AS _dq_invalid_rwpu,
+        CASE WHEN _rescued_data IS NOT NULL THEN false ELSE true END AS _dq_rescued_data
     FROM {{ ref('cmplx_criliti_sc_offence') }}
     WHERE _rejected_reason IS NULL
     {% if is_incremental() %}
@@ -34,6 +35,7 @@ SELECT
     *,
     CASE
         WHEN _dq_invalid_rwpu = true THEN true
+        WHEN _dq_rescued_data = true THEN true
         ELSE false
     END AS is_valid_row
 FROM base
