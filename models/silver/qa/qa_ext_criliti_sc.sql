@@ -22,6 +22,7 @@ WITH base AS (
         _file_date,
         _ingested_at,
         _bronze_loaded_at,
+        current_timestamp() AS _silver_qa_loaded_at,
 
         -- quality flags
         CASE WHEN accused_dob > CURRENT_DATE THEN false ELSE true END AS _dq_future_accused_dob,

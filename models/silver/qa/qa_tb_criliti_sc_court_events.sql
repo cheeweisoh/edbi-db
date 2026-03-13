@@ -21,6 +21,7 @@ WITH base AS (
         _file_date,
         _ingested_at,
         _bronze_loaded_at,
+        current_timestamp() AS _silver_qa_loaded_at,
 
         -- quality flags
         CASE WHEN (EXTRACT(HOUR FROM start_datetime) BETWEEN 0 AND 7) OR (EXTRACT(HOUR FROM start_datetime) BETWEEN 19 AND 23) THEN false ELSE true END AS _dq_early_start_datetime,

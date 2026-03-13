@@ -20,6 +20,7 @@ WITH base AS (
         _file_date,
         _ingested_at,
         _bronze_loaded_at,
+        current_timestamp() AS _silver_qa_loaded_at,
 
         -- quality flags
         CASE WHEN rwpu_base NOT IN ('M', 'P', 'R') THEN false ELSE true END AS _dq_invalid_rwpu,
