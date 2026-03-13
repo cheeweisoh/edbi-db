@@ -20,7 +20,7 @@ WITH base AS (
         _bronze_loaded_at,
 
         -- quality flags
-        CASE WHEN officer_name IS NULL THEN true ELSE false END AS _dq_missing_officer_name
+        CASE WHEN officer_name IS NULL THEN false ELSE true END AS _dq_missing_officer_name
     FROM {{ ref('tb_criliti_sc_court_event_off') }}
     WHERE _rejected_reason IS NULL
     {% if is_incremental() %}
