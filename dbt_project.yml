@@ -23,6 +23,9 @@ seeds:
 
 models:
   edbi:
+    +persist_docs:
+      relation: true
+      columns: true
     bronze:
       +database: edbi_teamg01
       +schema: bronze
