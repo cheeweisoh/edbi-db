@@ -21,7 +21,8 @@ WITH base AS (
         _bronze_loaded_at,
 
         -- quality flags
-        CASE WHEN officer_name IS NULL THEN false ELSE true END AS _dq_missing_officer_name
+        CASE WHEN officer_name IS NULL THEN false ELSE true END AS _dq_missing_officer_name,
+        CASE WHEN _rescued_data IS NOT NULL THEN false ELSE true END AS _dq_rescued_data
     FROM {{ ref('cmplx_criliti_sc_assigned_lo') }}
     WHERE _rejected_reason IS NULL
     {% if is_incremental() %}
@@ -33,6 +34,7 @@ SELECT
     *,
     CASE
         WHEN _dq_missing_officer_name = true THEN true
+        WHEN _dq_rescued_data = true THEN true
         ELSE false
     END AS is_valid_row
 FROM base

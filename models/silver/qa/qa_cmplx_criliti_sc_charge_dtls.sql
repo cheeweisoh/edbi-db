@@ -25,7 +25,8 @@ WITH base AS (
         CASE WHEN charge_type NOT IN ('DAC', 'MAC', 'MCN') THEN false ELSE true END AS _dq_invalid_charge_type,
         CASE WHEN offence_date > CURRENT_DATE THEN false ELSE true END AS _dq_future_offence_date,
         CASE WHEN filing_date > CURRENT_DATE THEN false ELSE true END AS _dq_future_filing_date,
-        CASE WHEN offence_date > filing_date THEN false ELSE true END AS _dq_filing_before_offence
+        CASE WHEN offence_date > filing_date THEN false ELSE true END AS _dq_filing_before_offence,
+        CASE WHEN _rescued_data IS NOT NULL THEN false ELSE true END AS _dq_rescued_data
     FROM {{ ref('cmplx_criliti_sc_charge_dtls') }}
     WHERE _rejected_reason IS NULL
     {% if is_incremental() %}
@@ -40,6 +41,7 @@ SELECT
         WHEN _dq_future_offence_date = true THEN true
         WHEN _dq_future_filing_date = true THEN true
         WHEN _dq_filing_before_offence = true THEN true
+        WHEN _dq_rescued_data = true THEN true
         ELSE false
     END AS is_valid_row
 FROM base
