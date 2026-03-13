@@ -5,3 +5,4 @@ cmplx_criliti_sc_charge_dtls,statecourts/cmplx_criliti_sc_charge_dtls,csv,(\d{8}
 cmplx_criliti_sc_offence,statecourts/cmplx_criliti_sc_offence,csv,(\d{8})\.csv,"pid,chargeno,acttitle,reference,rwpubase",true
 tb_criliti_sc_court_events,statecourts/tb_criliti_sc_court_events,csv,(\d{8})\.csv,"pid,id",true
 tb_criliti_sc_court_event_off,statecourts/tb_criliti_sc_court_event_off,csv,(\d{8})\.csv,"courteventid,officerid",true
+info_extracted,statecourts/info_extracted,csv,(\d{8})\.csv,"case_no,charge_no,entity_name",true
