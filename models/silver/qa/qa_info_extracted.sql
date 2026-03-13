@@ -1,0 +1,46 @@
+{{ config (
+    materialized='incremental',
+    incremental_strategy='merge',
+    unique_key=['case_no', 'charge_no', '_file_date'],
+    partition_by=['_file_date'],
+    on_schema_change='fail',
+    tags=['silver', 'qa']
+)}}
+
+WITH base AS (
+    SELECT
+        case_no,
+        charge_no, 
+        entity_name,
+        entity_type,
+        entity_age,
+        entity_gender,
+        relationship_to_victim,
+        offence_group,
+        special_type,
+        _rescued_data,
+        _source_file,
+        _file_date,
+        _ingested_at,
+        _bronze_loaded_at,
+
+        -- quality flags
+        CASE WHEN entity_type NOT IN ('Accused Person', 'Victim') THEN true ELSE false END AS _dq_invalid_entity_type,
+        CASE WHEN entity_age NOT BETWEEN 0 AND 120 THEN true ELSE false END AS _dq_invalid_entity_age,
+        CASE WHEN entity_gender NOT IN ('M', 'F') THEN true ELSE false END AS _dq_invalid_entity_gender
+    FROM {{ ref('info_extracted') }}
+    WHERE _rejected_reason IS NULL
+    {% if is_incremental() %}
+        AND _bronze_loaded_at > (SELECT MAX(_bronze_loaded_at) FROM {{ this }})
+    {% endif %}
+)
+
+SELECT
+    *,
+    CASE
+        WHEN _dq_invalid_entity_type = true THEN true
+        WHEN _dq_invalid_entity_age = true THEN true
+        WHEN _dq_invalid_entity_gender = true THEN true
+        ELSE false
+    END AS is_valid_row
+       
