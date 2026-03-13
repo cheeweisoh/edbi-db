@@ -17,3 +17,5 @@ sources:
         description: "Raw Metadata for Court Events"
       - name: tb_criliti_sc_court_event_off
         description: "Raw Metadata for Officers Assigned to each Court Event"
+      - name: info_extracted
+        description: "Raw Metadata Extracted from Court Documents"
