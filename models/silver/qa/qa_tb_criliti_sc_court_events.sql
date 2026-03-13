@@ -24,6 +24,8 @@ WITH base AS (
         current_timestamp() AS _silver_qa_loaded_at,
 
         -- quality flags
+        CASE WHEN start_datetime IS NULL THEN false ELSE true END AS _dq_missing_start_datetime,
+        CASE WHEN end_datetime IS NULL THEN false ELSE true END AS _dq_missing_end_datetime,
         CASE WHEN (EXTRACT(HOUR FROM start_datetime) BETWEEN 0 AND 7) OR (EXTRACT(HOUR FROM start_datetime) BETWEEN 19 AND 23) THEN false ELSE true END AS _dq_early_start_datetime,
         CASE WHEN end_datetime < start_datetime THEN false ELSE true END AS _dq_end_before_start,
         CASE WHEN court_number IS NULL THEN false ELSE true END AS _dq_missing_court_number,
@@ -39,8 +41,10 @@ WITH base AS (
 SELECT
     *,
     CASE
+        WHEN _dq_missing_start_datetime = true THEN true
+        WHEN _dq_missing_end_datetime = true THEN true
         WHEN _dq_early_start_datetime = true THEN true
-        WHEN _dq_future_end_datetime = true THEN true
+        WHEN _dq_end_before_start = true THEN true
         WHEN _dq_missing_court_number = true THEN true
         WHEN _dq_invalid_court_event_type = true THEN true
         WHEN _dq_invalid_court_event_status = true THEN true

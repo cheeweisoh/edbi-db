@@ -25,6 +25,7 @@ WITH base AS (
         current_timestamp() AS _silver_qa_loaded_at,
 
         -- quality flags
+        CASE WHEN case_no IS NULL THEN false ELSE true END AS _dq_missing_case_no,
         CASE WHEN accused_dob > CURRENT_DATE THEN false ELSE true END AS _dq_future_accused_dob,
         CASE WHEN accused_gender NOT IN ('M', 'F') THEN false ELSE true END AS _dq_invalid_gender,
         CASE WHEN _rescued_data IS NOT NULL THEN false ELSE true END AS _dq_rescued_data
@@ -38,6 +39,7 @@ WITH base AS (
 SELECT
     *,
     CASE
+        WHEN _dq_missing_case_no = true THEN true
         WHEN _dq_future_accused_dob = true THEN true
         WHEN _dq_invalid_gender = true THEN true
         WHEN _dq_rescued_data = true THEN true
