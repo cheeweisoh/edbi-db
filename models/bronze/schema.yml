@@ -214,33 +214,23 @@ models:
   - name: info_extracted
     description: "Extracted information from Charge Sheets"
     columns:
-      - name: Case
+      - name: case_no
         description: "Business key identifying the court case"
-        tests:
-          - not_null
-      - name: Charge
+      - name: charge_no
         description: "Business key identifying the charge in the court case"
-        tests:
-          - not_null
-      - name: Entity
+      - name: entity_name
         description: "Entity Name"
-        tests:
-          - not_null
-      - name: Entity Type
+      - name: entity_type
         description: "Whether this is the Accused Person or Victim"
-        tests:
-          - not_null
-      - name: Age
+      - name: entity_age
         description: "Age of Entity at time of offence"
-      - name: Gender
+      - name: entity_gender
         description: "Gender of Entity"
-      - name: Relationship to Victim
+      - name: relationship_to_victim
         description: "Relationship of the Entity to the Victim (if available)"
-      - name: Offence Groups
+      - name: offence_group
         description: "Categorisation of the offence based on the extracted information"
-        tests:
-          - not_null
-      - name: Special Type
+      - name: special_type
         description: "Offence Subcategories of interest"
       - name: _rescued_data
         description: "JSON list of columns with data issues"

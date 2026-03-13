@@ -50,4 +50,4 @@ SELECT
         WHEN _dq_invalid_court_event_status = true THEN true
         ELSE false
     END AS is_valid_row
-       
+FROM base

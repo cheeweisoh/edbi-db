@@ -15,7 +15,7 @@ WITH base AS (
         UPPER(TRIM(case_status)) AS case_status,
         case_title,
         UPPER(TRIM(directorate)) AS directorate,
-        accused_dob,
+        TRY_CAST(accused_dob AS DATE) AS accused_dob,
         accused_gender,
         _rescued_data,
         _source_file,
@@ -26,7 +26,7 @@ WITH base AS (
 
         -- quality flags
         CASE WHEN case_no IS NULL THEN false ELSE true END AS _dq_missing_case_no,
-        CASE WHEN accused_dob > CURRENT_DATE THEN false ELSE true END AS _dq_future_accused_dob,
+        CASE WHEN (accused_dob IS NULL) OR (accused_dob > CURRENT_DATE) THEN false ELSE true END AS _dq_future_accused_dob,
         CASE WHEN accused_gender NOT IN ('M', 'F') THEN false ELSE true END AS _dq_invalid_gender,
         CASE WHEN _rescued_data IS NOT NULL THEN false ELSE true END AS _dq_rescued_data
     FROM {{ ref('ext_criliti_sc') }}

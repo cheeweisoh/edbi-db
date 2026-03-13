@@ -43,4 +43,4 @@ SELECT
         WHEN _dq_invalid_entity_gender = true THEN true
         ELSE false
     END AS is_valid_row
-       
+FROM base       
