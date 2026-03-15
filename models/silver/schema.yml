@@ -47,6 +47,10 @@ models:
         tests:
           - not_null
           - unique
+      - name: officer_id
+        description: ""
+        tests:
+          - not_null
       - name: full_name
         description: ""
       - name: officer_cluster
@@ -73,6 +77,8 @@ models:
               to: ref("dim_person")
               field: person_skey
       - name: case_no
+        description: ""
+      - name: case_title
         description: ""
       - name: directorate
         description: ""
