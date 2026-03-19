@@ -108,8 +108,36 @@ date_dim AS (
 case_dim AS (
     SELECT
         case_skey,
-        case_pid
+        case_pid,
+        case_no
     FROM {{ ref('dim_case') }}
+),
+
+charge_count AS (
+    SELECT
+        case_skey,
+        COUNT(*) AS charge_count
+    FROM {{ ref('fact_case_charge') }}
+    GROUP BY case_skey
+),
+
+trial_ph_flag AS (
+    SELECT
+        case_pid,
+        MAX(CASE WHEN court_event_type IN ('TRIAL', 'PH') THEN 1 ELSE 0 END) AS trial_ph_flag
+    FROM {{ ref('qa_tb_criliti_sc_court_events') }}
+    WHERE is_valid_row = TRUE
+    GROUP BY case_pid
+),
+
+special_flag AS (
+    SELECT
+        case_no,
+        1 AS has_special_type
+    FROM {{ ref('qa_info_extracted') }}
+    WHERE is_valid_row = TRUE
+      AND special_type IS NOT NULL
+    GROUP BY case_no
 ),
 
 officer_dim AS (
@@ -130,6 +158,12 @@ fact_case_officer_source AS (
         d_first_mention.date_skey AS first_mention_date_skey,
         cs.case_status,
         ct.case_type,
+        CASE
+            WHEN COALESCE(sf.has_special_type, 0) = 1 THEN 'Complex'
+            WHEN COALESCE(tph.trial_ph_flag, 0) = 1 THEN 'Complex'
+            WHEN COALESCE(cc.charge_count, 0) >= 3 THEN 'Complex'
+            ELSE 'Simple'
+        END AS case_complexity,
         EXTRACT(YEAR FROM first_mention.first_mention_date) AS first_mention_year,
         a.assigned_from_date AS _file_date,
         NULL AS _bronze_loaded_at
@@ -151,6 +185,12 @@ fact_case_officer_source AS (
         ON a.case_pid = cs.case_pid
     LEFT JOIN case_type_flags ct
         ON a.case_pid = ct.case_pid
+    LEFT JOIN charge_count cc
+        ON c.case_skey = cc.case_skey
+    LEFT JOIN trial_ph_flag tph
+        ON a.case_pid = tph.case_pid
+    LEFT JOIN special_flag sf
+        ON c.case_no = sf.case_no
 )
 
 SELECT
@@ -161,6 +201,7 @@ SELECT
     first_mention_date_skey,
     case_status,
     case_type,
+    case_complexity,
     first_mention_year,
     _file_date,
     _bronze_loaded_at
