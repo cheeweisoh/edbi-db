@@ -82,8 +82,7 @@ fact_event_deduplicated AS (
 )
 
 SELECT
-    {{ dbt_utils.generate_surrogate_key(['court_event_id', 'officer_id']) }} AS event_skey,
-    court_event_id,
+    {{ dbt_utils.generate_surrogate_key(['court_event_id', 'officer_id']) }} AS event_officer_skey,
     case_skey,
     officer_skey,
     court_event_type,
