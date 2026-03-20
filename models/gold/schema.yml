@@ -32,3 +32,21 @@ models:
         description: "Type/category of the case"
       - name: charge_count
         description: "Number of charges for the case and offence group combination"
+
+  - name: event_offence_hearing_days
+    description: "Metric model for hearing days by court event, offence group, and officer"
+    columns:
+      - name: court_event_id
+        description: "Court event identifier"
+      - name: offence_group
+        description: "Offence group associated with the case"
+      - name: officer_id
+        description: "Officer identifier attached to the court event"
+      - name: court_event_type
+        description: "Type of court event"
+      - name: case_type
+        description: "Type/category of the case"
+      - name: case_status
+        description: "Current status of the case"
+      - name: hearing_days
+        description: "Number of hearing days attributed to the court event"
