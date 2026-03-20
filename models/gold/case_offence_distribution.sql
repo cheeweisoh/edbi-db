@@ -8,7 +8,7 @@ WITH charge_base AS (
         case_skey,
         offence_group,
         COUNT(*) AS charge_count
-    FROM {{ ref('fact_charge') }}
+    FROM {{ ref('fact_case_charge') }}
     GROUP BY
         case_skey,
         offence_group
