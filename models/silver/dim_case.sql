@@ -5,7 +5,15 @@
     tags=['silver']
 ) }}
 
-WITH cases AS (
+WITH
+{% if is_incremental() %}
+max_loaded_at AS (
+    SELECT COALESCE(MAX(_bronze_loaded_at), TIMESTAMP('1900-01-01')) AS cutoff_bronze_loaded_at
+    FROM {{ this }}
+),
+{% endif %}
+
+cases AS (
     SELECT DISTINCT
         case_pid,
         accused_name,
@@ -17,9 +25,12 @@ WITH cases AS (
         _file_date,
         _bronze_loaded_at
     FROM {{ ref('qa_ext_criliti_sc') }}
+    {% if is_incremental() %}
+    CROSS JOIN max_loaded_at
+    {% endif %}
     WHERE is_valid_row = TRUE
     {% if is_incremental() %}
-        AND _bronze_loaded_at > (SELECT COALESCE(MAX(_bronze_loaded_at), '1900-01-01') FROM {{ this }})
+        AND _bronze_loaded_at > max_loaded_at.cutoff_bronze_loaded_at
     {% endif %}
 ),
 

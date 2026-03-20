@@ -7,7 +7,15 @@
     tags=['silver', 'qa']
 )}}
 
-WITH base AS (
+WITH
+{% if is_incremental() %}
+max_loaded_at AS (
+    SELECT COALESCE(MAX(_bronze_loaded_at), TIMESTAMP('1900-01-01')) AS cutoff_bronze_loaded_at
+    FROM {{ this }}
+),
+{% endif %}
+
+base AS (
     SELECT
         start_datetime,
         end_datetime, 
@@ -31,10 +39,13 @@ WITH base AS (
         CASE WHEN court_number IS NULL THEN false ELSE true END AS _dq_missing_court_number,
         CASE WHEN court_event_type NOT IN ('FM', 'FM_PG', 'PG', 'CC', 'PTC', 'PH', 'SENTENCING', 'TRIAL', 'MITIGATION') THEN false ELSE true END AS _dq_invalid_court_event_type,
         CASE WHEN court_event_status NOT IN ('NEW', 'VACATED', 'VOIDED') THEN false ELSE true END AS _dq_invalid_court_event_status
-    FROM {{ ref('tb_criliti_sc_court_events') }}
+    FROM {{ ref('tb_criliti_sc_court_events') }} src
+    {% if is_incremental() %}
+    CROSS JOIN max_loaded_at
+    {% endif %}
     WHERE _rejected_reason IS NULL
     {% if is_incremental() %}
-        AND _bronze_loaded_at > (SELECT COALESCE(MAX(_bronze_loaded_at), '1900-01-01') FROM {{ this }})
+        AND src._bronze_loaded_at > max_loaded_at.cutoff_bronze_loaded_at
     {% endif %}
 )
 

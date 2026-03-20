@@ -7,7 +7,15 @@
     tags=['silver', 'qa']
 )}}
 
-WITH base AS (
+WITH
+{% if is_incremental() %}
+max_loaded_at AS (
+    SELECT COALESCE(MAX(_bronze_loaded_at), TIMESTAMP('1900-01-01')) AS cutoff_bronze_loaded_at
+    FROM {{ this }}
+),
+{% endif %}
+
+base AS (
     SELECT
         case_pid,
         charge_no,
@@ -25,10 +33,13 @@ WITH base AS (
         -- quality flags
         CASE WHEN rwpu_base NOT IN ('M', 'P', 'R') THEN false ELSE true END AS _dq_invalid_rwpu,
         CASE WHEN _rescued_data IS NOT NULL THEN false ELSE true END AS _dq_rescued_data
-    FROM {{ ref('cmplx_criliti_sc_offence') }}
+    FROM {{ ref('cmplx_criliti_sc_offence') }} src
+    {% if is_incremental() %}
+    CROSS JOIN max_loaded_at
+    {% endif %}
     WHERE _rejected_reason IS NULL
     {% if is_incremental() %}
-        AND _bronze_loaded_at > (SELECT COALESCE(MAX(_bronze_loaded_at), '1900-01-01') FROM {{ this }})
+        AND src._bronze_loaded_at > max_loaded_at.cutoff_bronze_loaded_at
     {% endif %}
 )
 

@@ -5,17 +5,28 @@
     tags=['silver']
 ) }}
 
-WITH case_accused AS (
+WITH
+{% if is_incremental() %}
+max_loaded_at AS (
+    SELECT COALESCE(MAX(_bronze_loaded_at), TIMESTAMP('1900-01-01')) AS cutoff_bronze_loaded_at
+    FROM {{ this }}
+),
+{% endif %}
+
+case_accused AS (
     SELECT DISTINCT
         accused_name AS full_name,
         accused_gender AS gender,
         TRY_CAST(accused_dob AS DATE) AS date_of_birth,
         _file_date,
         _bronze_loaded_at
-    FROM {{ ref('qa_ext_criliti_sc') }}
+    FROM {{ ref('qa_ext_criliti_sc') }} qa_ext
+    {% if is_incremental() %}
+    CROSS JOIN max_loaded_at
+    {% endif %}
     WHERE is_valid_row = TRUE
     {% if is_incremental() %}
-        AND _bronze_loaded_at > (SELECT COALESCE(MAX(_bronze_loaded_at), '1900-01-01') FROM {{ this }})
+        AND qa_ext._bronze_loaded_at > max_loaded_at.cutoff_bronze_loaded_at
     {% endif %}
 ),
 
@@ -26,10 +37,13 @@ extracted_persons AS (
         NULL AS date_of_birth,
         _file_date,
         _bronze_loaded_at
-    FROM {{ ref('qa_info_extracted') }}
+    FROM {{ ref('qa_info_extracted') }} qa_info
+    {% if is_incremental() %}
+    CROSS JOIN max_loaded_at
+    {% endif %}
     WHERE is_valid_row = TRUE
     {% if is_incremental() %}
-        AND _bronze_loaded_at > (SELECT COALESCE(MAX(_bronze_loaded_at), '1900-01-01') FROM {{ this }})
+        AND qa_info._bronze_loaded_at > max_loaded_at.cutoff_bronze_loaded_at
     {% endif %}
 ),
 

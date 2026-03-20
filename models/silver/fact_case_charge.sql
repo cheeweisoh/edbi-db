@@ -5,7 +5,15 @@
     tags=['silver']
 ) }}
 
-WITH charge_details AS (
+WITH
+{% if is_incremental() %}
+max_loaded_at AS (
+    SELECT COALESCE(MAX(_bronze_loaded_at), TIMESTAMP('1900-01-01')) AS cutoff_bronze_loaded_at
+    FROM {{ this }}
+),
+{% endif %}
+
+charge_details AS (
     SELECT
         case_pid,
         charge_no,
@@ -15,10 +23,13 @@ WITH charge_details AS (
         offence_group,
         _file_date,
         _bronze_loaded_at
-    FROM {{ ref('qa_cmplx_criliti_sc_charge_dtls') }}
+    FROM {{ ref('qa_cmplx_criliti_sc_charge_dtls') }} chg
+    {% if is_incremental() %}
+    CROSS JOIN max_loaded_at
+    {% endif %}
     WHERE is_valid_row = TRUE
     {% if is_incremental() %}
-        AND _bronze_loaded_at > (SELECT COALESCE(MAX(_bronze_loaded_at), '1900-01-01') FROM {{ this }})
+        AND chg._bronze_loaded_at > max_loaded_at.cutoff_bronze_loaded_at
     {% endif %}
 ),
 
@@ -30,11 +41,14 @@ charge_victims AS (
         entity_gender AS victim_gender,
         relationship_to_victim,
         offence_group
-    FROM {{ ref('qa_info_extracted') }}
+    FROM {{ ref('qa_info_extracted') }} info
+    {% if is_incremental() %}
+    CROSS JOIN max_loaded_at
+    {% endif %}
     WHERE is_valid_row = TRUE
       AND entity_type = 'Victim'
     {% if is_incremental() %}
-        AND _bronze_loaded_at > (SELECT COALESCE(MAX(_bronze_loaded_at), '1900-01-01') FROM {{ this }})
+        AND info._bronze_loaded_at > max_loaded_at.cutoff_bronze_loaded_at
     {% endif %}
 ),
 
