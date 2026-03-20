@@ -5,11 +5,9 @@ seeds:
     config:
       database: edbi_teamg01
       schema: config
-      contract:
-        enforced: true
-    meta:
-      contract:
-        enforced: true
+      meta:
+        contract:
+          enforced: true
     columns:
       - name: source_name
         data_type: string
