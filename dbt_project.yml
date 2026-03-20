@@ -3,6 +3,11 @@ version: "1.0.0"
 
 profile: "databricks"
 
+flags:
+  use_concurrent_microbatch: true
+  use_materialization_v2: true
+  use_managed_iceberg: true
+
 model-paths: ["models"]
 seed-paths: ["seeds"]
 target-path: "target"
