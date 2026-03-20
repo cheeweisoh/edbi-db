@@ -58,6 +58,7 @@ case_status_base AS (
         UPPER(TRIM(case_status)) AS case_status
     FROM {{ ref('qa_ext_criliti_sc') }}
     WHERE is_valid_row = TRUE
+    AND case_status IS NOT 'AMAL'
 ),
 
 fact_case_charge_source AS (
