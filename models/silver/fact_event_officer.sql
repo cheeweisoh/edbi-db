@@ -8,7 +8,8 @@
 WITH court_events AS (
     SELECT *
     FROM {{ ref('qa_tb_criliti_sc_court_events') }}
-    WHERE is_valid_row = TRUE
+    WHERE court_event_status = "NEW"
+        AND is_valid_row = TRUE
     {% if is_incremental() %}
         AND _bronze_loaded_at > (SELECT MAX(_bronze_loaded_at) FROM {{ this }})
     {% endif %}
@@ -58,7 +59,7 @@ fact_event_source AS (
         EXTRACT(YEAR FROM event_date) AS court_event_year,
         _file_date,
         _bronze_loaded_at
-    FROM combined
+    FROM combined s
     LEFT JOIN {{ ref('dim_case') }} cases
         ON s.case_pid = cases.case_pid
     LEFT JOIN {{ ref('dim_officer') }} officers
