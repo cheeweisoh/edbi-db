@@ -29,9 +29,9 @@ cases_with_accused AS (
         persons.person_skey
     FROM cases
     LEFT JOIN {{ ref('dim_person') }} AS persons
-        ON cases.accused_name = persons.full_name
-        AND cases.accused_gender = persons.gender
-        AND cases.accused_dob = persons.date_of_birth
+        ON COALESCE(cases.accused_name, '') = COALESCE(persons.full_name, '')
+        AND COALESCE(cases.accused_gender, '') = COALESCE(persons.gender, '')
+        AND COALESCE(cases.accused_dob, '1900-01-01') = COALESCE(persons.date_of_birth, '1900-01-01')
 )
 
 SELECT 
