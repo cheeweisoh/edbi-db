@@ -58,7 +58,6 @@ case_status_base AS (
         UPPER(TRIM(case_status)) AS case_status
     FROM {{ ref('qa_ext_criliti_sc') }}
     WHERE is_valid_row = TRUE
-    AND case_status != 'AMAL'
 ),
 
 fact_case_charge_source AS (
@@ -150,3 +149,4 @@ SELECT
     _bronze_loaded_at,
     current_timestamp() AS _silver_loaded_at
 FROM fact_case_charge_deduplicated
+WHERE case_status != 'AMAL'
