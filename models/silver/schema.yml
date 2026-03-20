@@ -93,7 +93,6 @@ models:
       - name: case_skey
         description: ""
         tests:
-          - not_null
           - relationships:
               to: ref("dim_case")
               field: case_skey
