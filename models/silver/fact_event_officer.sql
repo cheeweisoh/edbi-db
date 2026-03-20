@@ -11,7 +11,7 @@ WITH court_events AS (
     WHERE court_event_status = "NEW"
         AND is_valid_row = TRUE
     {% if is_incremental() %}
-        AND _bronze_loaded_at > (SELECT MAX(_bronze_loaded_at) FROM {{ this }})
+        AND _bronze_loaded_at > (SELECT COALESCE(MAX(_bronze_loaded_at), '1900-01-01') FROM {{ this }})
     {% endif %}
 ),
 
@@ -20,7 +20,7 @@ court_event_off AS (
     FROM {{ ref('qa_tb_criliti_sc_court_event_off') }}
     WHERE is_valid_row = TRUE
     {% if is_incremental() %}
-        AND _bronze_loaded_at > (SELECT MAX(_bronze_loaded_at) FROM {{ this }})
+        AND _bronze_loaded_at > (SELECT COALESCE(MAX(_bronze_loaded_at), '1900-01-01') FROM {{ this }})
     {% endif %}
 ),
 

@@ -34,7 +34,7 @@ WITH base AS (
     FROM {{ ref('tb_criliti_sc_court_events') }}
     WHERE _rejected_reason IS NULL
     {% if is_incremental() %}
-        AND _bronze_loaded_at > (SELECT MAX(_bronze_loaded_at) FROM {{ this }})
+        AND _bronze_loaded_at > (SELECT COALESCE(MAX(_bronze_loaded_at), '1900-01-01') FROM {{ this }})
     {% endif %}
 )
 

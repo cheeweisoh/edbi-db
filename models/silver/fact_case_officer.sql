@@ -17,7 +17,7 @@ WITH assigned_base AS (
     FROM {{ ref('snap_assigned_lo') }}
     WHERE is_valid_row = TRUE
     {% if is_incremental() %}
-        AND dbt_updated_at > (SELECT MAX(_officer_snapshot_date) FROM {{ this }})
+        AND _bronze_loaded_at > (SELECT COALESCE(MAX(_bronze_loaded_at), '1900-01-01') FROM {{ this }})
     {% endif %}
 ),
 
@@ -39,6 +39,7 @@ case_flags AS (
         MAX(CASE WHEN court_event_type IN ('TRIAL', 'PH') THEN 1 ELSE 0 END) AS trial_ph_flag
     FROM {{ ref('qa_tb_criliti_sc_court_events') }}
     WHERE is_valid_row = TRUE
+        AND court_event_status = 'NEW'
     GROUP BY case_pid
 ),
 

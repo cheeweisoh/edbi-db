@@ -17,7 +17,7 @@ WITH officers AS (
     FROM {{ ref('qa_cmplx_criliti_sc_assigned_lo') }}
     WHERE is_valid_row = TRUE
     {% if is_incremental() %}
-        AND _bronze_loaded_at > (SELECT MAX(_bronze_loaded_at) FROM {{ this }})
+        AND _bronze_loaded_at > (SELECT COALESCE(MAX(_bronze_loaded_at), '1900-01-01') FROM {{ this }})
     {% endif %}
 ),
 
