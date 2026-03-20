@@ -36,7 +36,7 @@ case_status AS (
         upper(trim(case_status)) AS case_status
     FROM {{ ref('qa_ext_criliti_sc') }}
     WHERE is_valid_row = TRUE
-    AND case_status IS NOT 'AMAL'
+    AND case_status != 'AMAL'
 ),
 
 case_flags AS (
