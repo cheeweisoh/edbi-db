@@ -43,7 +43,7 @@ merged_history AS (
                     OR existing.officer_cluster != officers.officer_cluster
                     OR existing.officer_team != officers.officer_team
                 )
-                THEN DATE_SUB(officers.ingestion_date, INTERVAL 1 DAY)
+                THEN DATE_SUB(officers.ingestion_date, 1)
             ELSE NULL
         END AS row_end_date,
         officers._file_date,
