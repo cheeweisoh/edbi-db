@@ -1,5 +1,6 @@
 {{ config(
     materialized='incremental',
+    partition_by=['officer_cluster', 'officer_team'],
     unique_key=['officer_skey', 'row_start_date'],
     incremental_strategy='merge',
     tags=['silver']

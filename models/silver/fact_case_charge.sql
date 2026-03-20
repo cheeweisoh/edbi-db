@@ -1,5 +1,6 @@
 {{ config(
     materialized='incremental',
+    partition_by=['offence_group'],
     unique_key='case_charge_skey',
     incremental_strategy='merge',
     tags=['silver']

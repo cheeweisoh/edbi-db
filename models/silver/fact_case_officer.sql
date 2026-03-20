@@ -1,5 +1,6 @@
 {{ config(
     materialized='incremental',
+    partition_by=['first_mention_year'],
     unique_key=['case_officer_skey'],
     incremental_strategy='merge',
     tags=['silver']

@@ -1,5 +1,6 @@
 {{ config(
     materialized='incremental',
+    partition_by=['court_event_year'],
     unique_key='event_officer_skey',
     incremental_strategy='delete+insert',
     tags=['silver']
