@@ -17,7 +17,7 @@ WITH assigned_base AS (
     FROM {{ ref('snap_assigned_lo') }}
     WHERE is_valid_row = TRUE
     {% if is_incremental() %}
-        AND dbt_updated_at > (SELECT MAX(_officer_snapshot_date) FROM {{ this }})
+        AND _bronze_loaded_at > (SELECT COALESCE(MAX(_bronze_loaded_at), '1900-01-01') FROM {{ this }})
     {% endif %}
 ),
 

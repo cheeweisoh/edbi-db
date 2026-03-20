@@ -18,7 +18,7 @@ WITH charge_details AS (
     FROM {{ ref('qa_cmplx_criliti_sc_charge_dtls') }}
     WHERE is_valid_row = TRUE
     {% if is_incremental() %}
-        AND _bronze_loaded_at > (SELECT MAX(_bronze_loaded_at) FROM {{ this }})
+        AND _bronze_loaded_at > (SELECT COALESCE(MAX(_bronze_loaded_at), '1900-01-01') FROM {{ this }})
     {% endif %}
 ),
 
@@ -34,7 +34,7 @@ charge_victims AS (
     WHERE is_valid_row = TRUE
       AND entity_type = 'Victim'
     {% if is_incremental() %}
-        AND _bronze_loaded_at > (SELECT MAX(_bronze_loaded_at) FROM {{ this }})
+        AND _bronze_loaded_at > (SELECT COALESCE(MAX(_bronze_loaded_at), '1900-01-01') FROM {{ this }})
     {% endif %}
 ),
 
