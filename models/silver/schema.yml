@@ -97,6 +97,8 @@ models:
           - relationships:
               to: ref("dim_case")
               field: case_skey
+      - name: court_event_id
+        description: ""
       - name: officer_skey
         description: ""
         tests:

@@ -44,6 +44,7 @@ fact_event_source AS (
     SELECT
         court_event_id,
         cases.case_skey,
+        officer_id,
         officers.officer_skey,
         court_event_type,
         dates.date_skey AS court_event_date_skey,
@@ -85,6 +86,7 @@ fact_event_deduplicated AS (
 SELECT
     {{ dbt_utils.generate_surrogate_key(['court_event_id', 'officer_id']) }} AS event_officer_skey,
     case_skey,
+    court_event_id,
     officer_skey,
     court_event_type,
     court_event_date_skey,
