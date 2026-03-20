@@ -8,7 +8,7 @@
 WITH officers AS (
     SELECT DISTINCT
         officer_id,
-        name AS full_name,
+        officer_name AS full_name,
         cluster AS officer_cluster,
         team AS officer_team,
         CAST(current_date() AS DATE) AS ingestion_date
