@@ -96,7 +96,7 @@ CREATE TABLE IF NOT EXISTS fact_event_officer (
         REFERENCES dim_date(date_skey)
 )
 USING DELTA
-PARTITIONED BY (event_year);
+PARTITIONED BY (court_event_year);
 
 
 CREATE TABLE IF NOT EXISTS fact_case_charge (
