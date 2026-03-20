@@ -64,7 +64,7 @@ fact_case_charge_source AS (
         ch.case_pid,
         ch.charge_no,
         ch.charge_type AS offence_type,
-        COALESCE(ch.offence_group, cv.offence_group, 'UNKNOWN') AS offence_group,
+        COALESCE(cv.offence_group, 'UNKNOWN') AS offence_group,
         UPPER(TRIM(ch.charge_status)) AS charge_status,
         cs.case_status,
         d_commit.date_skey AS committed_date_skey,

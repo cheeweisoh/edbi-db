@@ -56,24 +56,24 @@ combined AS (
 
 fact_event_source AS (
     SELECT
-        court_event_id,
+        s.court_event_id,
         cases.case_skey,
-        officer_id,
+        s.officer_id,
         officers.officer_skey,
-        court_event_type,
+        s.court_event_type,
         dates.date_skey AS court_event_date_skey,
         CASE
-            WHEN court_event_type IN ('CC', 'PTC') THEN 12.5 / 510.0
-            WHEN court_event_type IN ('TRIAL', 'PH') THEN
+            WHEN s.court_event_type IN ('CC', 'PTC') THEN 12.5 / 510.0
+            WHEN s.court_event_type IN ('TRIAL', 'PH') THEN
                 CASE
-                    WHEN EXTRACT(HOUR FROM start_datetime) >= 13 THEN 0.5
+                    WHEN EXTRACT(HOUR FROM s.start_datetime) >= 13 THEN 0.5
                     ELSE 1.0
                 END
             ELSE 85.0 / 510.0
         END AS court_event_hearing_days,
-        EXTRACT(YEAR FROM event_date) AS court_event_year,
-        _file_date,
-        _bronze_loaded_at
+        EXTRACT(YEAR FROM s.event_date) AS court_event_year,
+        s._file_date,
+        s._bronze_loaded_at
     FROM combined s
     LEFT JOIN {{ ref('dim_case') }} cases
         ON s.case_pid = cases.case_pid
