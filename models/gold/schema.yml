@@ -30,6 +30,12 @@ models:
         description: "Current status of the case"
       - name: case_type
         description: "Type/category of the case"
+      - name: officer_cluster
+        description: "Officer cluster for filtering"
+      - name: first_mention_date
+        description: "Date of first mention of the case in court"
+      - name: last_court_event_date
+        description: "Date of the last court event for the case"
       - name: case_count
         description: "Number of cases for the case and offence-group combination"
 
@@ -48,5 +54,11 @@ models:
         description: "Type/category of the case"
       - name: case_status
         description: "Current status of the case"
+      - name: officer_cluster
+        description: "Officer cluster for filtering"
+      - name: first_mention_date
+        description: "Date of first mention of the case in court"
+      - name: last_court_event_date
+        description: "Date of the last court event for the case"
       - name: hearing_days
         description: "Number of hearing days attributed to the court event"
