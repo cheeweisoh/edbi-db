@@ -11,8 +11,14 @@ WITH officers AS (
         officer_name AS full_name,
         cluster AS officer_cluster,
         team AS officer_team,
-        CAST(current_date() AS DATE) AS ingestion_date
+        CAST(current_date() AS DATE) AS ingestion_date,
+        _file_date,
+        _bronze_loaded_at
     FROM {{ ref('qa_cmplx_criliti_sc_assigned_lo') }}
+    WHERE is_valid_row = TRUE
+    {% if is_incremental() %}
+        AND _bronze_loaded_at > (SELECT MAX(_bronze_loaded_at) FROM {{ this }})
+    {% endif %}
 ),
 
 merged_history AS (
@@ -37,9 +43,11 @@ merged_history AS (
                     OR existing.officer_cluster != officers.officer_cluster
                     OR existing.officer_team != officers.officer_team
                 )
-                THEN DATE_SUB(officers.ingestion_date, INTERVAL 1 DAY)
+                THEN DATE_SUB(officers.ingestion_date, 1)
             ELSE NULL
-        END AS row_end_date
+        END AS row_end_date,
+        officers._file_date,
+        officers._bronze_loaded_at
     FROM officers
     LEFT JOIN {{ this }} AS existing
         ON officers.officer_id = existing.officer_id
@@ -53,5 +61,8 @@ SELECT
     officer_cluster,
     officer_team,
     row_start_date,
-    row_end_date
+    row_end_date,
+    _file_date,
+    _bronze_loaded_at,
+    current_timestamp() AS _silver_loaded_at
 FROM merged_history

@@ -1,6 +1,8 @@
 {{ config(
     materialized='table',
     partition_by=['year'],
+    unique_key='date_skey',
+    incremental_strategy='merge',
     tags=['silver']
 ) }}
 

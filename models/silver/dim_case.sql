@@ -14,13 +14,18 @@ WITH cases AS (
         case_no,
         case_title,
         directorate,
+        _file_date,
+        _bronze_loaded_at
     FROM {{ ref('qa_ext_criliti_sc') }}
     WHERE is_valid_row = TRUE
+    {% if is_incremental() %}
+        AND _bronze_loaded_at > (SELECT MAX(_bronze_loaded_at) FROM {{ this }})
+    {% endif %}
 ),
 
 cases_with_accused AS (
-    SELECT
-        cases.*
+    SELECT DISTINCT
+        cases.*,
         persons.person_skey
     FROM cases
     LEFT JOIN {{ ref('dim_person') }} AS persons
@@ -35,4 +40,7 @@ SELECT
     case_no,
     case_pid,
     directorate,
+    _file_date,
+    _bronze_loaded_at,
+    current_timestamp() AS _silver_loaded_at
 FROM cases_with_accused
