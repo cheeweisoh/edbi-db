@@ -8,9 +8,9 @@ seed-paths: ["seeds"]
 target-path: "target"
 clean-targets: ["target"]
 test-paths: ["tests"]
+snapshot-paths: ["snapshots"]
 # analysis-paths: ["analyses"]
 # macro-paths: ["macros"]
-# snapshot-paths: ["snapshots"]
 
 seeds:
   edbi:
