@@ -44,6 +44,7 @@ fact_event_source AS (
     SELECT
         court_event_id,
         cases.case_skey,
+        officer_id,
         officers.officer_skey,
         court_event_type,
         dates.date_skey AS court_event_date_skey,
