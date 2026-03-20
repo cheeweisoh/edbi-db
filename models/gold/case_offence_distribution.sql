@@ -3,11 +3,10 @@
     tags=['gold']
 ) }}
 
-WITH charge_base AS (
+WITH case_offence_base AS (
     SELECT
         case_skey,
-        offence_group,
-        COUNT(*) AS charge_count
+        offence_group
     FROM {{ ref('fact_case_charge') }}
     GROUP BY
         case_skey,
@@ -31,12 +30,17 @@ case_attributes AS (
 
 SELECT
     cm.case_no,
-    cb.offence_group,
+    cob.offence_group,
     ca.case_status,
     ca.case_type,
-    cb.charge_count
-FROM charge_base cb
+    COUNT(1) AS case_count
+FROM case_offence_base cob
 LEFT JOIN case_meta cm
-    ON cb.case_skey = cm.case_skey
+    ON cob.case_skey = cm.case_skey
 LEFT JOIN case_attributes ca
-    ON cb.case_skey = ca.case_skey
+    ON cob.case_skey = ca.case_skey
+GROUP BY
+    cm.case_no,
+    cob.offence_group,
+    ca.case_status,
+    ca.case_type

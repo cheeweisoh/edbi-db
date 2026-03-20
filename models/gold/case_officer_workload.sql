@@ -66,7 +66,7 @@ SELECT
     b.case_complexity,
     COUNT(1) AS case_count,
     SUM(CASE WHEN b.assigned_to_date_skey IS NULL THEN 1 ELSE 0 END) AS currently_assigned_count,
-    DATEDIFF(cd.case_disposition_date, fmd.first_mention_date) AS case_processing_days
+    DATEDIFF(COALESCE(cd.case_disposition_date, CURRENT_DATE()), fmd.first_mention_date) AS case_processing_days
 FROM base b
 LEFT JOIN officer_meta om ON b.officer_skey = om.officer_skey
 LEFT JOIN case_meta cm ON b.case_skey = cm.case_skey
