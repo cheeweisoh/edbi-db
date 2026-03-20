@@ -36,7 +36,6 @@ case_status AS (
         upper(trim(case_status)) AS case_status
     FROM {{ ref('qa_ext_criliti_sc') }}
     WHERE is_valid_row = TRUE
-    AND case_status != 'AMAL'
 ),
 
 case_flags AS (
@@ -172,3 +171,4 @@ SELECT
     _bronze_loaded_at,
     current_timestamp() AS _silver_loaded_at
 FROM fact_case_officer_deduplicated
+WHERE case_status != 'AMAL'
