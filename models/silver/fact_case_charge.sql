@@ -1,6 +1,6 @@
 {{ config(
     materialized='incremental',
-    unique_key='charge_skey',
+    unique_key='case_charge_skey',
     incremental_strategy='merge',
     tags=['silver']
 ) }}
@@ -64,14 +64,14 @@ fact_case_charge_source AS (
         ch.case_pid,
         ch.charge_no,
         ch.charge_type AS offence_type,
-        COALESCE(ch.offence_group, cv.offence_group, 'UNKNOWN') AS offence_group,
+        COALESCE(cv.offence_group, 'UNKNOWN') AS offence_group,
         UPPER(TRIM(ch.charge_status)) AS charge_status,
         cs.case_status,
         d_commit.date_skey AS committed_date_skey,
         ch._file_date,
         cv.relationship_to_victim AS relation_to_accused,
         cases.case_skey,
-        victims.victim_skey,
+        victims.person_skey AS victim_skey,
         ch._file_date,
         ch._bronze_loaded_at
     FROM charge_details ch

@@ -1,6 +1,6 @@
 {{ config(
     materialized='incremental',
-    unique_key=['case_skey', 'officer_skey', 'assigned_from_date_skey'],
+    unique_key=['case_officer_skey'],
     incremental_strategy='merge',
     tags=['silver']
 ) }}
