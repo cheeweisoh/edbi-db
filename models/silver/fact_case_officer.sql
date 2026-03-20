@@ -25,10 +25,7 @@ assigned_base AS (
     FROM {{ ref('snap_assigned_lo') }} snap
     {% if is_incremental() %}
     CROSS JOIN max_loaded_at
-    {% endif %}
-    WHERE is_valid_row = TRUE
-    {% if is_incremental() %}
-        AND snap._bronze_loaded_at > max_loaded_at.cutoff_bronze_loaded_at
+    WHERE snap._bronze_loaded_at > max_loaded_at.cutoff_bronze_loaded_at
     {% endif %}
 ),
 

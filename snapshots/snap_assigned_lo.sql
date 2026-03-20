@@ -3,9 +3,9 @@
 {{
     config(
         target_schema='snapshots',
-        unique_key='case_pid',
+        unique_key=['case_pid', 'officer_id'],
         strategy='check',
-        check_cols=['officer_id'],
+        check_cols=['_file_date'],
         invalidate_hard_deletes=True
     )
 }}
