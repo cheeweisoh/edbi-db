@@ -38,13 +38,22 @@ charge_victims AS (
     {% endif %}
 ),
 
+case_status_base AS (
+    SELECT
+        case_pid,
+        UPPER(TRIM(case_status)) AS case_status
+    FROM {{ ref('qa_ext_criliti_sc') }}
+    WHERE is_valid_row = TRUE
+),
+
 fact_case_charge_source AS (
     SELECT
         ch.case_pid,
         ch.charge_no,
         ch.charge_type AS offence_type,
         COALESCE(ch.offence_group, cv.offence_group, 'UNKNOWN') AS offence_group,
-        ch.charge_status,
+        UPPER(TRIM(ch.charge_status)) AS charge_status,
+        cs.case_status,
         d_commit.date_skey AS committed_date_skey,
         ch._file_date,
         cv.relationship_to_victim AS relation_to_accused,
@@ -63,6 +72,8 @@ fact_case_charge_source AS (
         AND cv.victim_gender = victims.gender
     LEFT JOIN {{ ref('dim_date') }} d_commit
         ON ch.offence_date = d_commit.full_date
+    LEFT JOIN case_status_base cs
+        ON ch.case_pid = cs.case_pid
 ),
 
 fact_case_charge_deduplicated AS (
@@ -74,9 +85,32 @@ fact_case_charge_deduplicated AS (
                 PARTITION BY case_pid, charge_no
                 ORDER BY _file_date DESC
             ) AS rn
-        FROM fact_event_charge_source
+        FROM fact_case_charge_source
     )
     WHERE rn = 1
+),
+
+charge_status_reconciled AS (
+    SELECT
+        *,
+        CASE
+            WHEN case_status = 'DISP' AND charge_status = 'PENDING' THEN 'SENTENCED'
+            ELSE charge_status
+        END AS charge_status_reconciled
+    FROM fact_case_charge_deduplicated
+),
+
+case_status_reconciled AS (
+    SELECT
+        case_pid,
+        CASE
+            WHEN MAX(CASE WHEN case_status = 'PEND' THEN 1 ELSE 0 END) = 1
+                 AND MAX(CASE WHEN charge_status_reconciled = 'PENDING' THEN 1 ELSE 0 END) = 0
+                THEN 'DISP'
+            ELSE MAX(case_status)
+        END AS case_status_reconciled
+    FROM charge_status_reconciled
+    GROUP BY case_pid
 )
 
 SELECT
@@ -84,11 +118,14 @@ SELECT
     case_skey,
     victim_skey,
     relation_to_accused,
-    charge_status,
+    csr.case_status_reconciled AS case_status,
+    ccr.charge_status_reconciled AS charge_status,
     committed_date_skey,
     offence_type,
     offence_group,
     _file_date,
     _bronze_loaded_at,
     current_timestamp() AS _silver_loaded_at
-FROM fact_case_charge_deduplicated
+FROM charge_status_reconciled ccr
+LEFT JOIN case_status_reconciled csr
+    ON ccr.case_pid = csr.case_pid

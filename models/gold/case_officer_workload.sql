@@ -11,7 +11,6 @@ WITH base AS (
         fco.assigned_to_date_skey,
         fco.first_mention_date_skey,
         fco.case_status,
-        fco.case_type,
         fco.case_complexity,
         fco.first_mention_year
     FROM {{ ref('fact_case_officer') }} AS fco
@@ -61,29 +60,20 @@ case_disposition AS (
 )
 
 SELECT
-    om.assigned_officer_id,
     om.assigned_officer_name,
     om.officer_cluster,
-    om.officer_team,
     b.case_status,
-    b.case_type,
-    fmd.first_mention_date,
-    cd.case_disposition_date,
     b.case_complexity,
     COUNT(1) AS case_count,
-    SUM(CASE WHEN b.assigned_to_date_skey IS NULL THEN 1 ELSE 0 END) AS currently_assigned_count
+    SUM(CASE WHEN b.assigned_to_date_skey IS NULL THEN 1 ELSE 0 END) AS currently_assigned_count,
+    DATEDIFF(cd.case_disposition_date, fmd.first_mention_date) AS case_processing_days
 FROM base b
 LEFT JOIN officer_meta om ON b.officer_skey = om.officer_skey
 LEFT JOIN case_meta cm ON b.case_skey = cm.case_skey
 LEFT JOIN first_mention_date fmd ON b.first_mention_date_skey = fmd.date_skey
 LEFT JOIN case_disposition cd ON b.case_skey = cd.case_skey
 GROUP BY
-    om.assigned_officer_id,
     om.assigned_officer_name,
     om.officer_cluster,
-    om.officer_team,
     b.case_status,
-    b.case_type,
-    fmd.first_mention_date,
-    cd.case_disposition_date,
     b.case_complexity

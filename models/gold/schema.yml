@@ -1,22 +1,34 @@
 version: 2
 
 models:
-  - name: court_case_workload_distribution
-    description: "Fact/metric model for workload distribution by case and officer"
+  - name: case_officer_workload
+    description: "Metric model for workload distribution by case and officer"
     columns:
-      - name: assigned_officer_id
-        description: "Officer identifier assigned to the case"
       - name: assigned_officer_name
         description: "Name of the officer assigned to the case"
       - name: officer_cluster
         description: "Officer cluster for categorization"
-      - name: officer_team
-        description: "Officer team for categorization"
       - name: case_status
         description: "Current status of the case"
-      - name: first_mention_date
-        description: "Date of first mention of the case in court"
-      - name: case_disposition_date
-        description: "Date when the case was disposed"
       - name: case_complexity
-        description: "Assigned complexity category for the case"
+        description: "Complexity category for the case"
+      - name: case_count
+        description: "Number of cases matching the group dimensions"
+      - name: currently_assigned_count
+        description: "Number of cases currently assigned to the officer (no end date)"
+      - name: case_processing_days
+        description: "Number of days between first mention date and case disposition date"
+
+  - name: case_offence_distribution
+    description: "Metric model for distribution of charges by offence group across cases"
+    columns:
+      - name: case_no
+        description: "Case identifier"
+      - name: offence_group
+        description: "Offence group category for the charge"
+      - name: case_status
+        description: "Current status of the case"
+      - name: case_type
+        description: "Type/category of the case"
+      - name: charge_count
+        description: "Number of charges for the case and offence group combination"
