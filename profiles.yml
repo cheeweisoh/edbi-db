@@ -1,5 +1,5 @@
 databricks:
-  target: prod
+  target: databricks_cluster
   outputs:
     databricks_cluster:
       type: databricks
