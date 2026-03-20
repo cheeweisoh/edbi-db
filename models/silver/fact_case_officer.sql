@@ -137,6 +137,7 @@ fact_case_officer_deduplicated AS (
             assigned_to_date,
             assigned_from_date_skey,
             assigned_to_date_skey,
+            first_mention_date_skey,
             case_status,
             case_type,
             case_complexity,
