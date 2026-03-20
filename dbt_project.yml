@@ -41,3 +41,8 @@ models:
       +schema: gold
       +materialized: table
       +tags: ["gold"]
+
+snapshots:
+  edbi:
+    +target_database: edbi_teamg01
+    +target_schema: silver
