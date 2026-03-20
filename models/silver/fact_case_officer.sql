@@ -84,7 +84,6 @@ special_flag AS (
 fact_case_officer_source AS (
     SELECT
         a.case_pid,
-        a.officer_id,
         c.case_skey,
         a.officer_id,
         o.officer_skey,
@@ -133,7 +132,21 @@ fact_case_officer_deduplicated AS (
     SELECT *
     FROM (
         SELECT
-            *,
+            case_pid,
+            case_skey,
+            officer_id,
+            officer_skey,
+            assigned_from_date,
+            assigned_to_date,
+            assigned_from_date_skey,
+            assigned_to_date_skey,
+            case_status,
+            case_type,
+            case_complexity,
+            first_mention_year,
+            _officer_snapshot_date,
+            _file_date,
+            _bronze_loaded_at,
             ROW_NUMBER() OVER (
                 PARTITION BY case_pid, officer_id, assigned_from_date
                 ORDER BY _file_date DESC
@@ -158,4 +171,4 @@ SELECT
     _file_date,
     _bronze_loaded_at,
     current_timestamp() AS _silver_loaded_at
-FROM fact_case_officer_source
+FROM fact_case_officer_deduplicated
