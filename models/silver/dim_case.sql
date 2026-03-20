@@ -13,9 +13,14 @@ WITH cases AS (
         TRY_CAST(accused_dob AS DATE) AS accused_dob,
         case_no,
         case_title,
-        directorate
+        directorate,
+        _file_date,
+        _bronze_loaded_at
     FROM {{ ref('qa_ext_criliti_sc') }}
     WHERE is_valid_row = TRUE
+    {% if is_incremental() %}
+        AND _bronze_loaded_at > (SELECT MAX(_bronze_loaded_at) FROM {{ this }})
+    {% endif %}
 ),
 
 cases_with_accused AS (
@@ -34,5 +39,8 @@ SELECT
     person_skey AS accused_skey,
     case_no,
     case_pid,
-    directorate
+    directorate,
+    _file_date,
+    _bronze_loaded_at,
+    current_timestamp() AS _silver_loaded_at
 FROM cases_with_accused
