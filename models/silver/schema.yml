@@ -78,18 +78,22 @@ models:
               field: person_skey
       - name: case_no
         description: ""
-      - name: case_title
+      - name: case_pid
         description: ""
       - name: directorate
         description: ""
   - name: fact_case_officer
     description: "Fact Table for Officers Assigned to Cases"
     columns:
-      - name: case_skey
+      - name: case_officer_skey
         description: ""
         tests:
           - not_null
           - unique
+      - name: case_skey
+        description: ""
+        tests:
+          - not_null
           - relationships:
               to: ref("dim_case")
               field: case_skey
@@ -123,10 +127,18 @@ models:
         description: ""
       - name: first_mention_year
         description: ""
+      - name: _officer_snapshot_date
+        description: ""
+      - name: _file_date
+        description: ""
+      - name: _bronze_loaded_at
+        description: ""
+      - name: _silver_loaded_at
+        description: ""
   - name: fact_event_officer
     description: "Fact Table for Officers Attending Court Events"
     columns:
-      - name: event_skey
+      - name: event_officer_skey
         description: ""
         tests:
           - not_null
@@ -155,10 +167,16 @@ models:
         description: ""
       - name: court_event_year
         description: ""
+      - name: _file_date
+        description: ""
+      - name: _bronze_loaded_at
+        description: ""
+      - name: _silver_loaded_at
+        description: ""
   - name: fact_case_charge
     description: "Fact Table for Charges belonging to Cases"
     columns:
-      - name: charge_skey
+      - name: case_charge_skey
         description: ""
         tests:
           - not_null
@@ -188,4 +206,10 @@ models:
       - name: offence_type
         description: ""
       - name: offence_group
+        description: ""
+      - name: _file_date
+        description: ""
+      - name: _bronze_loaded_at
+        description: ""
+      - name: _silver_loaded_at
         description: ""
