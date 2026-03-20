@@ -20,7 +20,6 @@ charge_details AS (
         charge_type,
         charge_status,
         offence_date,
-        offence_group,
         _file_date,
         _bronze_loaded_at
     FROM {{ ref('qa_cmplx_criliti_sc_charge_dtls') }} chg
