@@ -39,6 +39,7 @@ case_flags AS (
         MAX(CASE WHEN court_event_type IN ('TRIAL', 'PH') THEN 1 ELSE 0 END) AS trial_ph_flag
     FROM {{ ref('qa_tb_criliti_sc_court_events') }}
     WHERE is_valid_row = TRUE
+        AND court_event_status = 'NEW'
     GROUP BY case_pid
 ),
 
