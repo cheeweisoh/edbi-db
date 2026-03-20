@@ -58,6 +58,7 @@ case_status_base AS (
         UPPER(TRIM(case_status)) AS case_status
     FROM {{ ref('qa_ext_criliti_sc') }}
     WHERE is_valid_row = TRUE
+        AND case_status != 'AMAL'
 ),
 
 fact_case_charge_source AS (
@@ -75,6 +76,8 @@ fact_case_charge_source AS (
         ch._file_date,
         ch._bronze_loaded_at
     FROM charge_details ch
+    INNER JOIN case_status_base cs
+        ON ch.case_pid = cs.case_pid
     LEFT JOIN {{ ref('dim_case') }} cases
         ON ch.case_pid = cases.case_pid
     LEFT JOIN charge_victims cv
@@ -85,8 +88,6 @@ fact_case_charge_source AS (
         AND cv.victim_gender = victims.gender
     LEFT JOIN {{ ref('dim_date') }} d_commit
         ON ch.offence_date = d_commit.full_date
-    LEFT JOIN case_status_base cs
-        ON ch.case_pid = cs.case_pid
 ),
 
 charge_status_reconciled AS (
@@ -149,4 +150,3 @@ SELECT
     _bronze_loaded_at,
     current_timestamp() AS _silver_loaded_at
 FROM fact_case_charge_deduplicated
-WHERE case_status != 'AMAL'
