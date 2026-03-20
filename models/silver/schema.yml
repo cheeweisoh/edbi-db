@@ -199,7 +199,7 @@ models:
         description: ""
       - name: charge_status
         description: ""
-      - name: commited_date_skey
+      - name: committed_date_skey
         description: ""
         tests:
           - relationships:
