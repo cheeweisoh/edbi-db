@@ -114,7 +114,7 @@ case_status_reconciled AS (
 fact_case_charge_reconciled AS (
     SELECT
         r_charge.*,
-        r_case.case_status_reconciled AS case_status
+        r_case.case_status_reconciled
     FROM charge_status_reconciled r_charge
     LEFT JOIN case_status_reconciled r_case
         ON r_charge.case_pid = r_case.case_pid
