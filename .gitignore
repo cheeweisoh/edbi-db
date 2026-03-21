@@ -2,3 +2,16 @@
 target/
 dbt_packages/
 logs/
+.venv/
+.DS_Store
+.idea/
+.vscode/
+*.pyc
+__pycache__/
+.env
+.env.*
+*.log
+*.sqlite3
+*.db
+*.bak
+*.backup
