@@ -5,72 +5,72 @@ models:
     description: "Dimension Table for Dates"
     columns:
       - name: date_skey
-        description: ""
+        description: "Surrogate key for the date dimension record"
         tests:
           - not_null
           - unique
       - name: full_date
-        description: ""
+        description: "Calendar date represented by this row"
       - name: day
-        description: ""
+        description: "Day of month extracted from full_date"
       - name: month
-        description: ""
+        description: "Month number extracted from full_date"
       - name: quarter
-        description: ""
+        description: "Calendar quarter extracted from full_date"
       - name: year
-        description: ""
+        description: "Calendar year extracted from full_date"
       - name: day_of_week
-        description: ""
+        description: "Day of week derived from full_date"
       - name: is_workday
-        description: ""
+        description: "Flag indicating whether the date is a workday"
       - name: reporting_month
-        description: ""
+        description: "Reporting month bucket derived from full_date"
   - name: dim_person
     description: "Dimension Table for Persons (Accused and Victim)"
     columns:
       - name: person_skey
-        description: ""
+        description: "Surrogate key for the person dimension record"
         tests:
           - not_null
           - unique
       - name: full_name
-        description: ""
+        description: "Standardized full name of the person"
       - name: gender
-        description: ""
+        description: "Gender of the person"
       - name: date_of_birth
-        description: ""
+        description: "Date of birth of the person"
   - name: dim_officer
     description: "Dimension Table for Officers (Assigned and Attending)"
     columns:
       - name: officer_skey
-        description: ""
+        description: "Surrogate key for the officer dimension record"
         tests:
           - not_null
           - unique
       - name: officer_id
-        description: ""
+        description: "Business identifier of the officer"
         tests:
           - not_null
       - name: full_name
-        description: ""
+        description: "Standardized full name of the officer"
       - name: officer_cluster
-        description: ""
+        description: "Cluster assignment of the officer"
       - name: officer_team
-        description: ""
+        description: "Team assignment of the officer"
       - name: row_start_date
-        description: ""
+        description: "Start date for this officer dimension row validity"
       - name: row_end_date
-        description: ""
+        description: "End date for this officer dimension row validity"
   - name: dim_case
     description: "Dimension Table for Case"
     columns:
       - name: case_skey
-        description: ""
+        description: "Surrogate key for the case dimension record"
         tests:
           - not_null
           - unique
       - name: accused_skey
-        description: ""
+        description: "Foreign key to dim_person for the accused person"
         tests:
           - not_null
           - relationships:
@@ -78,21 +78,21 @@ models:
                 to: ref("dim_person")
                 field: person_skey
       - name: case_no
-        description: ""
+        description: "Business key identifying the case"
       - name: case_pid
-        description: ""
+        description: "Process instance identifier for the case"
       - name: directorate
-        description: ""
+        description: "Directorate responsible for handling the case"
   - name: fact_case_officer
     description: "Fact Table for Officers Assigned to Cases"
     columns:
       - name: case_officer_skey
-        description: ""
+        description: "Surrogate key for the case-officer assignment fact row"
         tests:
           - not_null
           - unique
       - name: case_skey
-        description: ""
+        description: "Foreign key to dim_case"
         tests:
           - not_null
           - relationships:
@@ -100,98 +100,98 @@ models:
                 to: ref("dim_case")
                 field: case_skey
       - name: officer_skey
-        description: ""
+        description: "Foreign key to dim_officer"
         tests:
           - relationships:
               arguments:
                 to: ref("dim_officer")
                 field: officer_skey
       - name: assigned_from_date_skey
-        description: ""
+        description: "Foreign key to dim_date for assignment start date"
         tests:
           - relationships:
               arguments:
                 to: ref("dim_date")
                 field: date_skey
       - name: assigned_to_date_skey
-        description: ""
+        description: "Foreign key to dim_date for assignment end date"
         tests:
           - relationships:
               arguments:
                 to: ref("dim_date")
                 field: date_skey
       - name: first_mention_date_skey
-        description: ""
+        description: "Foreign key to dim_date for first mention date"
         tests:
           - relationships:
               arguments:
                 to: ref("dim_date")
                 field: date_skey
       - name: case_status
-        description: ""
+        description: "Current status of the case"
       - name: case_type
-        description: ""
+        description: "Type or category of the case"
       - name: first_mention_year
-        description: ""
+        description: "Year component of the first mention date"
       - name: _officer_snapshot_date
-        description: ""
+        description: "Snapshot date used for officer attributes in this fact row"
       - name: _file_date
-        description: ""
+        description: "Date extracted from source file name"
       - name: _bronze_loaded_at
-        description: ""
+        description: "Timestamp when source data was loaded into bronze layer"
       - name: _silver_loaded_at
-        description: ""
+        description: "Timestamp when this row was loaded into silver layer"
   - name: fact_event_officer
     description: "Fact Table for Officers Attending Court Events"
     columns:
       - name: event_officer_skey
-        description: ""
+        description: "Surrogate key for the event-officer fact row"
         tests:
           - not_null
           - unique
       - name: case_skey
-        description: ""
+        description: "Foreign key to dim_case"
         tests:
           - relationships:
               arguments:
                 to: ref("dim_case")
                 field: case_skey
       - name: officer_skey
-        description: ""
+        description: "Foreign key to dim_officer"
         tests:
           - relationships:
               arguments:
                 to: ref("dim_officer")
                 field: officer_skey
       - name: court_event_type
-        description: ""
+        description: "Type of court event"
       - name: court_event_date_skey
-        description: ""
+        description: "Foreign key to dim_date for the court event date"
         tests:
           - relationships:
               arguments:
                 to: ref("dim_date")
                 field: date_skey
       - name: court_event_hearing_days
-        description: ""
+        description: "Number of hearing days attributed to the court event"
       - name: court_event_year
-        description: ""
+        description: "Year component of the court event date"
       - name: _file_date
-        description: ""
+        description: "Date extracted from source file name"
       - name: _bronze_loaded_at
-        description: ""
+        description: "Timestamp when source data was loaded into bronze layer"
       - name: _silver_loaded_at
-        description: ""
+        description: "Timestamp when this row was loaded into silver layer"
   - name: fact_case_charge
     description: "Fact Table for Charges belonging to Cases"
     columns:
       - name: case_charge_skey
-        description: ""
+        description: "Surrogate key for the case-charge fact row"
         tests:
           - not_null
           - unique
       - name: case_skey
-        description: ""
+        description: "Foreign key to dim_case"
         tests:
           - not_null
           - relationships:
@@ -199,30 +199,30 @@ models:
                 to: ref("dim_case")
                 field: case_skey
       - name: victim_skey
-        description: ""
+        description: "Foreign key to dim_person for the victim (if available)"
         tests:
           - relationships:
               arguments:
                 to: ref("dim_person")
                 field: person_skey
       - name: relation_to_accused
-        description: ""
+        description: "Relationship of the victim to the accused"
       - name: charge_status
-        description: ""
+        description: "Current status of the charge"
       - name: committed_date_skey
-        description: ""
+        description: "Foreign key to dim_date for offence committed date"
         tests:
           - relationships:
               arguments:
                 to: ref("dim_date")
                 field: date_skey
       - name: offence_type
-        description: ""
+        description: "Detailed offence type for the charge"
       - name: offence_group
-        description: ""
+        description: "Higher-level offence grouping for analytics"
       - name: _file_date
-        description: ""
+        description: "Date extracted from source file name"
       - name: _bronze_loaded_at
-        description: ""
+        description: "Timestamp when source data was loaded into bronze layer"
       - name: _silver_loaded_at
-        description: ""
+        description: "Timestamp when this row was loaded into silver layer"
