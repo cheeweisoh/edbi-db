@@ -57,4 +57,3 @@ SELECT
         ELSE false
     END AS is_valid_row
 FROM base
-WHERE case_status != "AMAL"

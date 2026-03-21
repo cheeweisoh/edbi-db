@@ -74,8 +74,9 @@ models:
         tests:
           - not_null
           - relationships:
-              to: ref("dim_person")
-              field: person_skey
+              arguments:
+                to: ref("dim_person")
+                field: person_skey
       - name: case_no
         description: ""
       - name: case_pid
@@ -93,36 +94,39 @@ models:
       - name: case_skey
         description: ""
         tests:
-          - not_null
+          - not null
           - relationships:
-              to: ref("dim_case")
-              field: case_skey
-      - name: court_event_id
-        description: ""
+              arguments:
+                to: ref("dim_case")
+                field: case_skey
       - name: officer_skey
         description: ""
         tests:
           - relationships:
-              to: ref("dim_officer")
-              field: officer_skey
+              arguments:
+                to: ref("dim_officer")
+                field: officer_skey
       - name: assigned_from_date_skey
         description: ""
         tests:
           - relationships:
-              to: ref("dim_date")
-              field: date_skey
+              arguments:
+                to: ref("dim_date")
+                field: date_skey
       - name: assigned_to_date_skey
         description: ""
         tests:
           - relationships:
-              to: ref("dim_date")
-              field: date_skey
+              arguments:
+                to: ref("dim_date")
+                field: date_skey
       - name: first_mention_date_skey
         description: ""
         tests:
           - relationships:
-              to: ref("dim_date")
-              field: date_skey
+              arguments:
+                to: ref("dim_date")
+                field: date_skey
       - name: case_status
         description: ""
       - name: case_type
@@ -149,22 +153,25 @@ models:
         description: ""
         tests:
           - relationships:
-              to: ref("dim_case")
-              field: case_skey
+              arguments:
+                to: ref("dim_case")
+                field: case_skey
       - name: officer_skey
         description: ""
         tests:
           - relationships:
-              to: ref("dim_officer")
-              field: officer_skey
+              arguments:
+                to: ref("dim_officer")
+                field: officer_skey
       - name: court_event_type
         description: ""
       - name: court_event_date_skey
         description: ""
         tests:
           - relationships:
-              to: ref("dim_date")
-              field: date_skey
+              arguments:
+                to: ref("dim_date")
+                field: date_skey
       - name: court_event_hearing_days
         description: ""
       - name: court_event_year
@@ -186,25 +193,29 @@ models:
       - name: case_skey
         description: ""
         tests:
+          - not_null
           - relationships:
-              to: ref("dim_case")
-              field: case_skey
+              arguments:
+                to: ref("dim_case")
+                field: case_skey
       - name: victim_skey
         description: ""
         tests:
           - relationships:
-              to: ref("dim_person")
-              field: person_skey
+              arguments:
+                to: ref("dim_person")
+                field: person_skey
       - name: relation_to_accused
         description: ""
       - name: charge_status
         description: ""
-      - name: commited_date_skey
+      - name: committed_date_skey
         description: ""
         tests:
           - relationships:
-              to: ref("dim_date")
-              field: date_skey
+              arguments:
+                to: ref("dim_date")
+                field: date_skey
       - name: offence_type
         description: ""
       - name: offence_group

@@ -1,5 +1,6 @@
 {{ config(
     materialized='incremental',
+    partition_by=['directorate'],
     unique_key='case_skey',
     incremental_strategy='merge',
     tags=['silver']
@@ -50,6 +51,7 @@ SELECT
     person_skey AS accused_skey,
     case_no,
     case_pid,
+    case_title,
     directorate,
     _file_date,
     _bronze_loaded_at,

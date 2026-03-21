@@ -77,4 +77,6 @@ GROUP BY
     om.assigned_officer_name,
     om.officer_cluster,
     b.case_status,
-    b.case_complexity
+    b.case_complexity,
+    fmd.first_mention_date,
+    cd.case_disposition_date
