@@ -1,0 +1,10 @@
+court_event_type,grouped_court_event_type
+FM,Other Mention
+FM_PG,PG Mention
+PG,PG Mention
+CC,PTC
+PTC,PTC
+PH,Trial
+SENTENCING,Other Mention
+TRIAL,Trial
+MITIGATION,Other Mention
