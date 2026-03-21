@@ -12,7 +12,7 @@ ext_criliti_sc,Q_IODETAILS,Q_IODETAILS,STRING,true,true
 ext_criliti_sc,_rescued_data,_rescued_data,STRING,true,true
 ext_criliti_sc,_source_file,_source_file,STRING,false,true
 ext_criliti_sc,_ingested_at,_ingested_at,DATETIME,false,true
-ext_criliti_sc,_file_date,_file_date,DATE,false,true
+ext_criliti_sc,_file_date,_file_date,TIMESTAMP,false,true
 cmplx_criliti_sc_assigned_lo,pid,case_pid,STRING,false,true
 cmplx_criliti_sc_assigned_lo,cluster,cluster,STRING,true,true
 cmplx_criliti_sc_assigned_lo,name,officer_name,STRING,true,true
@@ -21,7 +21,7 @@ cmplx_criliti_sc_assigned_lo,team,team,STRING,true,true
 cmplx_criliti_sc_assigned_lo,_rescued_data,_rescued_data,STRING,true,true
 cmplx_criliti_sc_assigned_lo,_source_file,_source_file,STRING,false,true
 cmplx_criliti_sc_assigned_lo,_ingested_at,_ingested_at,DATETIME,false,true
-cmplx_criliti_sc_assigned_lo,_file_date,_file_date,DATE,false,true
+cmplx_criliti_sc_assigned_lo,_file_date,_file_date,TIMESTAMP,false,true
 cmplx_criliti_sc_charge_dtls,pid,case_pid,STRING,false,true
 cmplx_criliti_sc_charge_dtls,chargeno,charge_no,STRING,false,true
 cmplx_criliti_sc_charge_dtls,chargetype,charge_type,STRING,true,true
@@ -31,7 +31,7 @@ cmplx_criliti_sc_charge_dtls,filingdt,filing_date,STRING,true,true
 cmplx_criliti_sc_charge_dtls,_rescued_data,_rescued_data,STRING,true,true
 cmplx_criliti_sc_charge_dtls,_source_file,_source_file,STRING,false,true
 cmplx_criliti_sc_charge_dtls,_ingested_at,_ingested_at,DATETIME,false,true
-cmplx_criliti_sc_charge_dtls,_file_date,_file_date,DATE,false,true
+cmplx_criliti_sc_charge_dtls,_file_date,_file_date,TIMESTAMP,false,true
 cmplx_criliti_sc_offence,pid,case_pid,STRING,false,true
 cmplx_criliti_sc_offence,chargeno,charge_no,STRING,false,true
 cmplx_criliti_sc_offence,acttitle,act_title,STRING,true,true
@@ -41,7 +41,7 @@ cmplx_criliti_sc_offence,description_ntext,description,STRING,true,true
 cmplx_criliti_sc_offence,_rescued_data,_rescued_data,STRING,true,true
 cmplx_criliti_sc_offence,_source_file,_source_file,STRING,false,true
 cmplx_criliti_sc_offence,_ingested_at,_ingested_at,DATETIME,false,true
-cmplx_criliti_sc_offence,_file_date,_file_date,DATE,false,true
+cmplx_criliti_sc_offence,_file_date,_file_date,TIMESTAMP,false,true
 tb_criliti_sc_court_events,startdtstr,start_datetime,STRING,true,true
 tb_criliti_sc_court_events,enddtstr,end_datetime,STRING,true,true
 tb_criliti_sc_court_events,pid,case_pid,STRING,false,true
@@ -52,7 +52,7 @@ tb_criliti_sc_court_events,courteventstatus,court_event_status,STRING,true,true
 tb_criliti_sc_court_events,_rescued_data,_rescued_data,STRING,true,true
 tb_criliti_sc_court_events,_source_file,_source_file,STRING,false,true
 tb_criliti_sc_court_events,_ingested_at,_ingested_at,DATETIME,false,true
-tb_criliti_sc_court_events,_file_date,_file_date,DATE,false,true
+tb_criliti_sc_court_events,_file_date,_file_date,TIMESTAMP,false,true
 tb_criliti_sc_court_event_off,courteventid,court_event_id,STRING,false,true
 tb_criliti_sc_court_event_off,officerid,officer_id,STRING,false,true
 tb_criliti_sc_court_event_off,name,officer_name,STRING,true,true
@@ -60,7 +60,7 @@ tb_criliti_sc_court_event_off,division,officer_division,STRING,true,true
 tb_criliti_sc_court_event_off,_rescued_data,_rescued_data,STRING,true,true
 tb_criliti_sc_court_event_off,_source_file,_source_file,STRING,false,true
 tb_criliti_sc_court_event_off,_ingested_at,_ingested_at,DATETIME,false,true
-tb_criliti_sc_court_event_off,_file_date,_file_date,DATE,false,true
+tb_criliti_sc_court_event_off,_file_date,_file_date,TIMESTAMP,false,true
 info_extracted,case_no,case_no,STRING,false,true
 info_extracted,charge_no,charge_no,STRING,true,true
 info_extracted,entity_name,entity_name,STRING,true,true
@@ -73,4 +73,4 @@ info_extracted,special_type,special_type,STRING,true,true
 info_extracted,_rescued_data,_rescued_data,STRING,true,true
 info_extracted,_source_file,_source_file,STRING,false,true
 info_extracted,_ingested_at,_ingested_at,DATETIME,false,true
-info_extracted,_file_date,_file_date,DATE,false,true
+info_extracted,_file_date,_file_date,TIMESTAMP,false,true

@@ -136,7 +136,7 @@ models:
       - name: _officer_snapshot_date
         description: "Snapshot date used for officer attributes in this fact row"
       - name: _file_date
-        description: "Date extracted from source file name"
+        description: "Timestamp (YYYYMMDDHHMMSS) extracted from source file name"
       - name: _bronze_loaded_at
         description: "Timestamp when source data was loaded into bronze layer"
       - name: _silver_loaded_at
@@ -177,7 +177,7 @@ models:
       - name: court_event_year
         description: "Year component of the court event date"
       - name: _file_date
-        description: "Date extracted from source file name"
+        description: "Timestamp (YYYYMMDDHHMMSS) extracted from source file name"
       - name: _bronze_loaded_at
         description: "Timestamp when source data was loaded into bronze layer"
       - name: _silver_loaded_at
@@ -221,7 +221,7 @@ models:
       - name: offence_group
         description: "Higher-level offence grouping for analytics"
       - name: _file_date
-        description: "Date extracted from source file name"
+        description: "Timestamp (YYYYMMDDHHMMSS) extracted from source file name"
       - name: _bronze_loaded_at
         description: "Timestamp when source data was loaded into bronze layer"
       - name: _silver_loaded_at

@@ -1,4 +1,4 @@
-from pyspark.sql.functions import col, current_timestamp, regexp_extract
+from pyspark.sql.functions import col, current_timestamp, regexp_extract, to_timestamp
 
 VOLUME_ROOT = "/Volumes/edbi_teamg01/landing"
 CATALOG = "edbi_teamg01"
@@ -24,7 +24,14 @@ for row in metadata:
         .load(source_path)
     )
 
-    df = df.withColumn("_source_file", col("_metadata.file_path")).withColumn("_ingested_at", current_timestamp()).withColumn("_file_date", regexp_extract(col("_metadata.file_path"), date_pattern, 1))
+    df = (
+        df.withColumn("_source_file", col("_metadata.file_path"))
+        .withColumn("_ingested_at", current_timestamp())
+        .withColumn(
+            "_file_date",
+            to_timestamp(regexp_extract(col("_metadata.file_path"), date_pattern, 1), "yyyyMMddHHmmss"),
+        )
+    )
 
     df.writeStream.format("delta").outputMode("append").option("checkpointLocation", f"{source_path}_checkpoint").option("mergeSchema", "true").trigger(availableNow=True).toTable(target_table)
 
