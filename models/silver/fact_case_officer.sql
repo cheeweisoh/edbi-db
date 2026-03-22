@@ -1,3 +1,5 @@
+-- depends_on: {{ ref('qa_cmplx_criliti_sc_assigned_lo') }}
+
 {{ config(
     materialized='incremental',
     partition_by=['first_mention_year'],
@@ -12,6 +14,12 @@ max_loaded_at AS (
     SELECT COALESCE(MAX(_bronze_loaded_at), TIMESTAMP('1900-01-01')) AS cutoff_bronze_loaded_at
     FROM {{ this }}
 ),
+
+updated_cases AS (
+    SELECT case_pid
+    FROM {{ ref('qa_cmplx_criliti_sc_assigned_lo') }}
+    WHERE _bronze_loaded_at > (SELECT cutoff_bronze_loaded_at FROM max_loaded_at)
+),
 {% endif %}
 
 assigned_base AS (
@@ -25,8 +33,7 @@ assigned_base AS (
         _bronze_loaded_at
     FROM {{ ref('snap_assigned_lo') }} snap
     {% if is_incremental() %}
-    CROSS JOIN max_loaded_at
-    WHERE snap._bronze_loaded_at > max_loaded_at.cutoff_bronze_loaded_at
+    WHERE case_pid IN (SELECT case_pid FROM updated_cases)
     {% endif %}
 ),
 
