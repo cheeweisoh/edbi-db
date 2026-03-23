@@ -1,3 +1,5 @@
+-- depends_on: {{ ref('qa_cmplx_criliti_sc_assigned_lo') }}
+
 {{ config(
     materialized='incremental',
     partition_by=['first_mention_year'],
@@ -12,6 +14,12 @@ max_loaded_at AS (
     SELECT COALESCE(MAX(_bronze_loaded_at), TIMESTAMP('1900-01-01')) AS cutoff_bronze_loaded_at
     FROM {{ this }}
 ),
+
+updated_cases AS (
+    SELECT case_pid
+    FROM {{ ref('qa_cmplx_criliti_sc_assigned_lo') }}
+    WHERE _bronze_loaded_at > (SELECT cutoff_bronze_loaded_at FROM max_loaded_at)
+),
 {% endif %}
 
 assigned_base AS (
@@ -25,8 +33,7 @@ assigned_base AS (
         _bronze_loaded_at
     FROM {{ ref('snap_assigned_lo') }} snap
     {% if is_incremental() %}
-    CROSS JOIN max_loaded_at
-    WHERE snap._bronze_loaded_at > max_loaded_at.cutoff_bronze_loaded_at
+    WHERE case_pid IN (SELECT case_pid FROM updated_cases)
     {% endif %}
 ),
 
@@ -40,16 +47,19 @@ case_status AS (
 
 case_flags AS (
     SELECT
-        case_pid,
+        ce.case_pid,
         CASE
-            WHEN MAX(CASE WHEN court_event_type IN ('TRIAL', 'PH') THEN 1 ELSE 0 END) = 1 THEN 'Trial'
-            ELSE 'PG'
+            WHEN MAX(CASE WHEN mapping.grouped_court_event_type = 'Trial' THEN 1 ELSE 0 END) = 1 THEN 'Trial'
+            WHEN MAX(CASE WHEN mapping.grouped_court_event_type = 'PG Mention' THEN 1 ELSE 0 END) = 1 THEN 'PG'
+            ELSE 'TBD'
         END AS case_type,
-        MAX(CASE WHEN court_event_type IN ('TRIAL', 'PH') THEN 1 ELSE 0 END) AS trial_ph_flag
-    FROM {{ ref('qa_tb_criliti_sc_court_events') }}
-    WHERE is_valid_row = TRUE
-        AND court_event_status = 'NEW'
-    GROUP BY case_pid
+        MAX(CASE WHEN mapping.grouped_court_event_type = 'Trial' THEN 1 ELSE 0 END) AS trial_ph_flag
+    FROM {{ ref('qa_tb_criliti_sc_court_events') }} ce
+    LEFT JOIN {{ ref('court_event_type_mapping') }} mapping
+    ON ce.court_event_type = mapping.court_event_type
+    WHERE ce.is_valid_row = TRUE
+        AND ce.court_event_status = 'NEW'
+    GROUP BY ce.case_pid
 ),
 
 first_mention AS (

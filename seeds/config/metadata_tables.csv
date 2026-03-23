@@ -1,8 +1,8 @@
 source_name,subfolder,file_format,date_pattern,natural_key,active
-ext_criliti_sc,statecourts/ext_criliti_sc,csv,(\d{8})\.csv,casepid,true
-cmplx_criliti_sc_assigned_lo,statecourts/cmplx_criliti_sc_assigned_lo,csv,(\d{8})\.csv,"pid,officerid",true
-cmplx_criliti_sc_charge_dtls,statecourts/cmplx_criliti_sc_charge_dtls,csv,(\d{8})\.csv,"pid,chargeno",true
-cmplx_criliti_sc_offence,statecourts/cmplx_criliti_sc_offence,csv,(\d{8})\.csv,"pid,chargeno,acttitle,reference,rwpubase",true
-tb_criliti_sc_court_events,statecourts/tb_criliti_sc_court_events,csv,(\d{8})\.csv,"pid,id",true
-tb_criliti_sc_court_event_off,statecourts/tb_criliti_sc_court_event_off,csv,(\d{8})\.csv,"courteventid,officerid",true
-info_extracted,statecourts/info_extracted,csv,(\d{8})\.csv,"case_no,charge_no,entity_name",true
+ext_criliti_sc,statecourts/ext_criliti_sc,csv,(\d{14})\.csv,casepid,true
+cmplx_criliti_sc_assigned_lo,statecourts/cmplx_criliti_sc_assigned_lo,csv,(\d{14})\.csv,"pid,officerid",true
+cmplx_criliti_sc_charge_dtls,statecourts/cmplx_criliti_sc_charge_dtls,csv,(\d{14})\.csv,"pid,chargeno",true
+cmplx_criliti_sc_offence,statecourts/cmplx_criliti_sc_offence,csv,(\d{14})\.csv,"pid,chargeno,acttitle,reference,rwpubase",true
+tb_criliti_sc_court_events,statecourts/tb_criliti_sc_court_events,csv,(\d{14})\.csv,"pid,id",true
+tb_criliti_sc_court_event_off,statecourts/tb_criliti_sc_court_event_off,csv,(\d{14})\.csv,"courteventid,officerid",true
+info_extracted,statecourts/info_extracted,csv,(\d{14})\.csv,"case_no,charge_no,entity_name",true

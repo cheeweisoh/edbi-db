@@ -3,6 +3,24 @@
     partition_by=['court_event_year'],
     unique_key='event_officer_skey',
     incremental_strategy='delete+insert',
+    pre_hook=[
+        """{% if is_incremental() %}
+            MERGE INTO {{ this }} AS target
+            USING (
+                SELECT DISTINCT src.court_event_id
+                FROM {{ ref('qa_tb_criliti_sc_court_events') }} AS src
+                CROSS JOIN (
+                    SELECT COALESCE(MAX(_bronze_loaded_at), timestamp('1900-01-01')) AS max_loaded_at
+                    FROM {{ this }}
+                ) AS watermark
+                WHERE src.is_valid_row = TRUE
+                AND UPPER(TRIM(src.court_event_status)) != 'NEW'
+                AND src._bronze_loaded_at > watermark.max_loaded_at
+            ) AS source
+            ON target.court_event_id = source.court_event_id
+            WHEN MATCHED THEN DELETE
+            {% endif %}"""
+    ],
     tags=['silver']
 ) }}
 
@@ -55,6 +73,22 @@ combined AS (
         ON court_events.court_event_id = court_event_off.court_event_id
 ),
 
+combined_group_court_event AS (
+    SELECT
+        c.court_event_id,
+        c.case_pid,
+        c.officer_id,
+        mapping.grouped_court_event_type AS court_event_type,
+        c.start_datetime,
+        c.end_datetime,
+        c.event_date,
+        c._file_date,
+        c._bronze_loaded_at
+    FROM combined c
+    LEFT JOIN {{ ref('court_event_type_mapping') }} mapping
+    ON c.court_event_type = mapping.court_event_type
+),
+
 fact_event_source AS (
     SELECT
         s.court_event_id,
@@ -64,8 +98,8 @@ fact_event_source AS (
         s.court_event_type,
         dates.date_skey AS court_event_date_skey,
         CASE
-            WHEN s.court_event_type IN ('CC', 'PTC') THEN 12.5 / 510.0
-            WHEN s.court_event_type IN ('TRIAL', 'PH') THEN
+            WHEN s.court_event_type = "PTC" THEN 12.5 / 510.0
+            WHEN s.court_event_type = "Trial" THEN
                 CASE
                     WHEN EXTRACT(HOUR FROM s.start_datetime) >= 13 THEN 0.5
                     ELSE 1.0
@@ -75,7 +109,7 @@ fact_event_source AS (
         EXTRACT(YEAR FROM s.event_date) AS court_event_year,
         s._file_date,
         s._bronze_loaded_at
-    FROM combined s
+    FROM combined_group_court_event s
     LEFT JOIN {{ ref('dim_case') }} cases
         ON s.case_pid = cases.case_pid
     LEFT JOIN {{ ref('dim_officer') }} officers

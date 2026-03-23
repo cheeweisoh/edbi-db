@@ -73,7 +73,7 @@
             _source_file,
             _file_date,
             _rejected_reason,
-            _rescued_data,
+            -- _rescued_data,
             _ingested_at,
             current_timestamp() as _bronze_loaded_at
         from validated
