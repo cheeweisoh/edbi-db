@@ -209,6 +209,113 @@ def load_case_offence_distribution(selected_clusters: Optional[List[str]] = None
             }
         )
 
+@st.cache_data(ttl=300)
+def load_case_hearing_days(case_type: str = 'PG', selected_clusters: Optional[List[str]] = None, selected_years: Optional[List[str]] = None, metric: str = 'Hearing Days', court_event_types: Optional[List[str]] = None):
+    """Load PG/Trial hearing days totals from event_offence_hearing_days source."""
+    http_path = os.getenv("DATABRICKS_HTTP_PATH", "")
+    if "<your-warehouse-id>" in http_path or http_path.strip() == "":
+        raise ValueError("DATABRICKS_HTTP_PATH is not configured. Update dashboard/.env with your warehouse endpoint path.")
+
+    try:
+        connector = DatabricksConnector()
+        params = {}
+
+        where_clauses = [f"case_type = '{case_type}'"]
+        if court_event_types:
+            evt_placeholders = []
+            for idx, evt in enumerate(court_event_types):
+                key = f"evt_{idx}"
+                evt_placeholders.append(f":{key}")
+                params[key] = evt
+            where_clauses.append(f"court_event_type IN ({', '.join(evt_placeholders)})")
+        if selected_clusters:
+            cluster_placeholders = []
+            for idx, cluster in enumerate(selected_clusters):
+                key = f"cluster_{idx}"
+                cluster_placeholders.append(f":{key}")
+                params[key] = cluster
+            where_clauses.append(f"officer_cluster IN ({', '.join(cluster_placeholders)})")
+
+        if selected_years:
+            year_placeholders = []
+            for idx, year in enumerate(selected_years):
+                key = f"year_{idx}"
+                year_placeholders.append(f":{key}")
+                params[key] = year
+            where_clauses.append(f"date_format(first_mention_date, 'yyyy') IN ({', '.join(year_placeholders)})")
+
+        where_clause = ' AND '.join(where_clauses)
+
+        if case_type == 'Trial':
+            segment_case = """
+                    CASE
+                        WHEN court_event_type = 'Other Mention' THEN 'Non-PG Mentions'
+                        WHEN court_event_type = 'PTC' THEN 'PTCs'
+                        WHEN court_event_type = 'Trial' THEN 'Trial'
+                    END
+            """
+        else:
+            segment_case = """
+                    CASE
+                        WHEN court_event_type = 'Other Mention' THEN 'Non-PG Mentions'
+                        WHEN court_event_type = 'PG Mention' THEN 'PG Mentions'
+                        WHEN court_event_type = 'PTC' THEN 'Other Categories'
+                    END
+            """
+
+        if metric == 'Man Days':
+            query = f"""
+            SELECT
+                offence_group,
+                {segment_case} AS segment,
+                SUM(hearing_days) AS hearing_days
+            FROM edbi_teamg01.gold.event_offence_hearing_days
+            WHERE {where_clause}
+            GROUP BY offence_group, segment
+            ORDER BY offence_group, segment
+            """
+        else:
+            query = f"""
+            SELECT
+                offence_group,
+                segment,
+                SUM(max_hearing_days) AS hearing_days
+            FROM (
+                SELECT
+                    offence_group,
+                    court_event_id,
+                    {segment_case} AS segment,
+                    MAX(hearing_days) AS max_hearing_days
+                FROM edbi_teamg01.gold.event_offence_hearing_days
+                WHERE {where_clause}
+                GROUP BY offence_group, court_event_id, court_event_type
+            ) srv
+            GROUP BY offence_group, segment
+            ORDER BY offence_group, segment
+            """
+
+        df = connector.query(query, params=params if params else None)
+        if df.empty:
+            return pd.DataFrame(
+                {
+                    'offence_group': ['Hurt', 'Harassment', 'Vulnerable Victims'],
+                    'segment': ['Non-PG Mentions', 'PG Mentions', 'Other Categories'],
+                    'hearing_days': [0, 0, 0],
+                }
+            )
+
+        df.columns = [c.lower() for c in df.columns]
+        return df[['offence_group', 'segment', 'hearing_days']]
+    except Exception as exc:
+        st.warning(f"Databricks load failed: {exc}. Using fallback sample data.")
+        return pd.DataFrame(
+            {
+                'offence_group': ['Hurt', 'Harassment', 'Vulnerable Victims'],
+                'segment': ['Non-PG Mentions', 'PG Mentions', 'Other Categories'],
+                'hearing_days': [40, 28, 12],
+            }
+        )
+
 # --- DASHBOARD FUNCTIONS ---
 
 def show_prosecution_trends():
@@ -249,21 +356,99 @@ def show_prosecution_trends():
         st.info('No offence distribution data available yet.')
 
     st.markdown('<div class="sub-header">Average Time Spent in each Stage</div>', unsafe_allow_html=True)
+    filter_col1, filter_col2, _ = st.columns([1, 1, 3])
+    pg_metric = filter_col1.selectbox("Metric", ["Hearing Days", "Man Days"], index=0, key="pg_metric")
+    event_type_options = ["All", "Non-PG Mentions", "PG Mentions", "Other Categories", "PTCs", "Trial"]
+    selected_event_types = filter_col2.multiselect("Court Event Type", event_type_options, default=["All"], key="event_type_filter")
     sc1, sc2 = st.columns(2)
+
+    # Map legend names back to raw court_event_type values
+    legend_to_raw = {
+        'Non-PG Mentions': 'Other Mention',
+        'PG Mentions': 'PG Mention',
+        'Other Categories': 'PTC',
+        'PTCs': 'PTC',
+        'Trial': 'Trial',
+    }
+    event_type_filter = [] if not selected_event_types or "All" in selected_event_types else [legend_to_raw.get(v, v) for v in selected_event_types]
+    # Load data for PG and Trial charts with same metric and filters
+    pg_df = load_case_hearing_days(case_type='PG', selected_clusters=selected_clusters, selected_years=selected_years, metric=pg_metric, court_event_types=event_type_filter)
+    trial_df = load_case_hearing_days(case_type='Trial', selected_clusters=selected_clusters, selected_years=selected_years, metric=pg_metric, court_event_types=event_type_filter)
+
     with sc1:
         st.write("**PG Cases**")
-        fig_pg = go.Figure()
-        fig_pg.add_trace(go.Bar(y=offences, x=[25,23,50,45,32], name="Non-PG", orientation='h', marker_color='#1f4e79'))
-        fig_pg.add_trace(go.Bar(y=offences, x=[28,25,53,55,38], name="PG", orientation='h', marker_color='#2e75b6'))
-        fig_pg.update_layout(barmode='stack', height=250, margin=dict(l=0, r=0, t=0, b=0))
-        st.plotly_chart(fig_pg, width='stretch')
+        if pg_df.empty:
+            st.info('No PG hearing days data available.')
+        else:
+            pg_pivot = pg_df.pivot_table(index='offence_group', columns='segment', values='hearing_days', aggfunc='sum', fill_value=0)
+            pg_pivot = pg_pivot.reset_index()
+            pg_pivot = pg_pivot.sort_values('offence_group', ascending=False)
+
+            fig_pg = go.Figure()
+            pg_order = ['Non-PG Mentions', 'PG Mentions', 'Other Categories']
+            pg_colors = {'Non-PG Mentions': '#1f4e79', 'PG Mentions': '#2e75b6', 'Other Categories': '#a6a6a6'}
+            for segment in pg_order:
+                if segment in pg_pivot.columns:
+                    segment_values = pd.to_numeric(pg_pivot[segment], errors='coerce').fillna(0)
+                    fig_pg.add_trace(go.Bar(
+                        y=pg_pivot['offence_group'],
+                        x=segment_values,
+                        name=segment,
+                        orientation='h',
+                        marker_color=pg_colors.get(segment, '#a6a6a6'),
+                        text=segment_values,
+                        texttemplate='%{text:.0f}',
+                        textposition='inside'
+                    ))
+
+            fig_pg.update_layout(
+                barmode='stack',
+                height=450,
+                margin=dict(l=0, r=0, t=0, b=0),
+                xaxis_title=pg_metric,
+                yaxis_title='Offence Group',
+                showlegend=True,
+                legend=dict(orientation='h', y=-0.25, x=0.5, xanchor='center', traceorder='normal'),
+                yaxis=dict(categoryorder='array', categoryarray=pg_pivot['offence_group'].tolist())
+            )
+            st.plotly_chart(fig_pg, width='stretch')
+
     with sc2:
         st.write("**Trial Cases**")
-        fig_tr = go.Figure()
-        fig_tr.add_trace(go.Bar(y=offences, x=[29,56,54,49,44], name="Non-PG", orientation='h', marker_color='#1f4e79'))
-        fig_tr.add_trace(go.Bar(y=offences, x=[158,154,142,153,105], name="Trial", orientation='h', marker_color='#d9e9f6'))
-        fig_tr.update_layout(barmode='stack', height=250, margin=dict(l=0, r=0, t=0, b=0))
-        st.plotly_chart(fig_tr, width='stretch')
+        if trial_df.empty:
+            st.info('No trial hearing days data available.')
+        else:
+            trial_pivot = trial_df.pivot_table(index='offence_group', columns='segment', values='hearing_days', aggfunc='sum', fill_value=0)
+            trial_pivot = trial_pivot.reset_index().sort_values('offence_group', ascending=False)
+
+            fig_tr = go.Figure()
+            trial_order = ['Non-PG Mentions', 'PTCs', 'Trial']
+            trial_colors = {'Non-PG Mentions': '#1f4e79', 'PTCs': '#5b9bd5', 'Trial': '#d9e9f6'}
+            for segment in trial_order:
+                if segment in trial_pivot.columns:
+                    segment_values = pd.to_numeric(trial_pivot[segment], errors='coerce').fillna(0)
+                    fig_tr.add_trace(go.Bar(
+                        y=trial_pivot['offence_group'],
+                        x=segment_values,
+                        name=segment,
+                        orientation='h',
+                        marker_color=trial_colors.get(segment, '#a6a6a6'),
+                        text=segment_values,
+                        texttemplate='%{text:.0f}',
+                        textposition='inside'
+                    ))
+
+            fig_tr.update_layout(
+                barmode='stack',
+                height=450,
+                margin=dict(l=0, r=0, t=0, b=0),
+                xaxis_title=pg_metric,
+                yaxis_title='Offence Group',
+                showlegend=True,
+                legend=dict(orientation='h', y=-0.25, x=0.5, xanchor='center', traceorder='normal'),
+                yaxis=dict(categoryorder='array', categoryarray=trial_pivot['offence_group'].tolist())
+            )
+            st.plotly_chart(fig_tr, width='stretch')
 
 def show_workload_overview():
     st.markdown('<div class="main-header">COURT CASES WORKLOAD DISTRIBUTION OVERVIEW</div>', unsafe_allow_html=True)
