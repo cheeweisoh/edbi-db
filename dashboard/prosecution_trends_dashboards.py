@@ -144,7 +144,9 @@ def load_case_offence_distribution(selected_clusters: Optional[List[str]] = None
         status = row.get('case_status', '').upper()
         case_type = row.get('case_type', '').upper()
         
-        if status == 'PEND' and case_type == 'PG':
+        if status == 'PEND' and case_type == 'TBD':
+            return 'Open'
+        elif status == 'PEND' and case_type == 'PG':
             return 'Ongoing PG'
         elif status == 'PEND' and case_type == 'TRIAL':
             return 'Ongoing Trial'
@@ -152,6 +154,8 @@ def load_case_offence_distribution(selected_clusters: Optional[List[str]] = None
             return 'Concluded PG'
         elif status == 'DISP' and case_type == 'TRIAL':
             return 'Concluded Trial'
+        elif status == 'DISP' and case_type == 'TBD':
+            return None
         elif status in ('DATA', 'DNATA'):
             return 'Concluded Acquittal'
         else:
@@ -197,6 +201,8 @@ def load_case_offence_distribution(selected_clusters: Optional[List[str]] = None
 
         # Create composite case_status from case_status and case_type
         df['case_status'] = df.apply(map_case_status, axis=1)
+        # Drop unmapped combinations (e.g. DISP+TBD)
+        df = df[df['case_status'].notna()]
         df = df[['offence_type', 'case_status', 'case_count']]
         return df
     except Exception as exc:
@@ -208,6 +214,157 @@ def load_case_offence_distribution(selected_clusters: Optional[List[str]] = None
                 'case_count': [40, 230, 80, 220, 20, 100, 80, 150, 20, 240, 110, 145, 40, 350, 40, 225, 80, 480, 235, 575]
             }
         )
+
+@st.cache_data(ttl=300)
+def load_yearly_case_distribution(selected_clusters: Optional[List[str]] = None, selected_months: Optional[List[str]] = None):
+    """Load case counts broken down by year for hover tooltips."""
+    http_path = os.getenv("DATABRICKS_HTTP_PATH", "")
+    if "<your-warehouse-id>" in http_path or http_path.strip() == "":
+        return pd.DataFrame(columns=['offence_type', 'case_status', 'year', 'case_count'])
+
+    def map_case_status(row):
+        status = row.get('case_status', '').upper()
+        case_type = row.get('case_type', '').upper()
+        if status == 'PEND' and case_type == 'TBD':
+            return 'Open'
+        elif status == 'PEND' and case_type == 'PG':
+            return 'Ongoing PG'
+        elif status == 'PEND' and case_type == 'TRIAL':
+            return 'Ongoing Trial'
+        elif status == 'DISP' and case_type == 'PG':
+            return 'Concluded PG'
+        elif status == 'DISP' and case_type == 'TRIAL':
+            return 'Concluded Trial'
+        elif status == 'DISP' and case_type == 'TBD':
+            return None
+        elif status in ('DATA', 'DNATA'):
+            return 'Concluded Acquittal'
+        else:
+            return f'{status} {case_type}'.strip()
+
+    try:
+        connector = DatabricksConnector()
+        params = {}
+        query = """
+        SELECT offence_group AS offence_type,
+               case_status,
+               case_type,
+               date_format(first_mention_date, 'yyyy') AS year,
+               SUM(case_count) AS case_count
+        FROM edbi_teamg01.gold.case_offence_distribution
+        WHERE 1=1
+        """
+        if selected_clusters:
+            cluster_placeholders = []
+            for idx, cluster in enumerate(selected_clusters):
+                key = f"cluster_{idx}"
+                cluster_placeholders.append(f":{key}")
+                params[key] = cluster
+            query += f" AND officer_cluster IN ({', '.join(cluster_placeholders)})"
+        if selected_months:
+            year_placeholders = []
+            for idx, year in enumerate(selected_months):
+                key = f"year_{idx}"
+                year_placeholders.append(f":{key}")
+                params[key] = year
+            query += f" AND date_format(first_mention_date, 'yyyy') IN ({', '.join(year_placeholders)})"
+        query += " GROUP BY offence_group, case_status, case_type, date_format(first_mention_date, 'yyyy')"
+
+        df = connector.query(query, params=params if params else None)
+        if df.empty:
+            return pd.DataFrame(columns=['offence_type', 'case_status', 'year', 'case_count'])
+        df.columns = [c.lower() for c in df.columns]
+        df['case_status'] = df.apply(map_case_status, axis=1)
+        df = df[df['case_status'].notna()]
+        df = df.groupby(['offence_type', 'case_status', 'year'], as_index=False)['case_count'].sum()
+        return df
+    except Exception:
+        return pd.DataFrame(columns=['offence_type', 'case_status', 'year', 'case_count'])
+
+@st.cache_data(ttl=300)
+def load_yearly_hearing_days(case_type: str = 'PG', selected_clusters: Optional[List[str]] = None, selected_years: Optional[List[str]] = None, metric: str = 'Hearing Days', court_event_types: Optional[List[str]] = None):
+    """Load hearing days broken down by year for hover trend charts."""
+    http_path = os.getenv("DATABRICKS_HTTP_PATH", "")
+    if "<your-warehouse-id>" in http_path or http_path.strip() == "":
+        return pd.DataFrame(columns=['offence_group', 'segment', 'year', 'hearing_days'])
+
+    try:
+        connector = DatabricksConnector()
+        params = {}
+        where_clauses = [f"case_type = '{case_type}'"]
+        if court_event_types:
+            evt_placeholders = []
+            for idx, evt in enumerate(court_event_types):
+                key = f"evt_{idx}"
+                evt_placeholders.append(f":{key}")
+                params[key] = evt
+            where_clauses.append(f"court_event_type IN ({', '.join(evt_placeholders)})")
+        if selected_clusters:
+            cluster_placeholders = []
+            for idx, cluster in enumerate(selected_clusters):
+                key = f"cluster_{idx}"
+                cluster_placeholders.append(f":{key}")
+                params[key] = cluster
+            where_clauses.append(f"officer_cluster IN ({', '.join(cluster_placeholders)})")
+        if selected_years:
+            year_placeholders = []
+            for idx, year in enumerate(selected_years):
+                key = f"year_{idx}"
+                year_placeholders.append(f":{key}")
+                params[key] = year
+            where_clauses.append(f"date_format(first_mention_date, 'yyyy') IN ({', '.join(year_placeholders)})")
+        where_clause = ' AND '.join(where_clauses)
+
+        if case_type == 'Trial':
+            segment_case = """
+                    CASE
+                        WHEN court_event_type = 'Other Mention' THEN 'Non-PG Mentions'
+                        WHEN court_event_type = 'PTC' THEN 'PTCs'
+                        WHEN court_event_type = 'Trial' THEN 'Trial'
+                    END
+            """
+        else:
+            segment_case = """
+                    CASE
+                        WHEN court_event_type = 'Other Mention' THEN 'Non-PG Mentions'
+                        WHEN court_event_type = 'PG Mention' THEN 'PG Mentions'
+                        WHEN court_event_type = 'PTC' THEN 'Other Categories'
+                    END
+            """
+
+        if metric == 'Man Days':
+            query = f"""
+            SELECT offence_group, {segment_case} AS segment,
+                   date_format(first_mention_date, 'yyyy') AS year,
+                   SUM(hearing_days) AS hearing_days
+            FROM edbi_teamg01.gold.event_offence_hearing_days
+            WHERE {where_clause}
+            GROUP BY offence_group, segment, date_format(first_mention_date, 'yyyy')
+            ORDER BY offence_group, segment, year
+            """
+        else:
+            query = f"""
+            SELECT offence_group, segment, year, SUM(max_hearing_days) AS hearing_days
+            FROM (
+                SELECT offence_group, court_event_id,
+                       {segment_case} AS segment,
+                       date_format(first_mention_date, 'yyyy') AS year,
+                       MAX(hearing_days) AS max_hearing_days
+                FROM edbi_teamg01.gold.event_offence_hearing_days
+                WHERE {where_clause}
+                GROUP BY offence_group, court_event_id, court_event_type, date_format(first_mention_date, 'yyyy')
+            ) srv
+            GROUP BY offence_group, segment, year
+            ORDER BY offence_group, segment, year
+            """
+
+        df = connector.query(query, params=params if params else None)
+        if df.empty:
+            return pd.DataFrame(columns=['offence_group', 'segment', 'year', 'hearing_days'])
+        df.columns = [c.lower() for c in df.columns]
+        return df[['offence_group', 'segment', 'year', 'hearing_days']]
+    except Exception:
+        return pd.DataFrame(columns=['offence_group', 'segment', 'year', 'hearing_days'])
 
 @st.cache_data(ttl=300)
 def load_case_hearing_days(case_type: str = 'PG', selected_clusters: Optional[List[str]] = None, selected_years: Optional[List[str]] = None, metric: str = 'Hearing Days', court_event_types: Optional[List[str]] = None):
@@ -330,6 +487,8 @@ def show_prosecution_trends():
     selected_years = [] if not selected_year or "All Years" in selected_year else selected_year
 
     df = load_case_offence_distribution(selected_clusters=selected_clusters, selected_months=selected_years)
+    yearly_df = load_yearly_case_distribution(selected_clusters=selected_clusters, selected_months=selected_years)
+
     if not df.empty:
         pivot = df.pivot_table(index='offence_type', columns='case_status', values='case_count', aggfunc='sum', fill_value=0)
         pivot = pivot.reset_index()
@@ -340,18 +499,68 @@ def show_prosecution_trends():
             offences = []
 
         fig = go.Figure()
-        status_columns = [col for col in pivot.columns if col != 'offence_type']
-        # Keep a stable color palette for up to 5 categories
-        color_palette = ['#b86b7e', '#d291a1', '#e8b8c5', '#7a7a7a', '#a6a6a6']
+        # Fixed legend/stacking order and matching colour for each status
+        status_order = ['Open', 'Ongoing PG', 'Ongoing Trial', 'Concluded PG', 'Concluded Trial', 'Concluded Acquittal']
+        status_colors = {
+            'Open': '#8b3a4a',
+            'Ongoing PG': '#b86b7e',
+            'Ongoing Trial': '#d291a1',
+            'Concluded PG': '#e8b8c5',
+            'Concluded Trial': '#7a7a7a',
+            'Concluded Acquittal': '#a6a6a6',
+        }
+        all_columns = [col for col in pivot.columns if col != 'offence_type']
+        # Ordered statuses first, then any unexpected ones at the end
+        status_columns = [s for s in status_order if s in all_columns] + [s for s in all_columns if s not in status_order]
+        fallback_palette = ['#8b3a4a', '#b86b7e', '#d291a1', '#e8b8c5', '#7a7a7a', '#a6a6a6']
         for i, status in enumerate(status_columns):
             values = pivot[status].tolist()[::-1]
-            fig.add_trace(go.Bar(y=offences, x=values, name=status, orientation='h', marker_color=color_palette[i % len(color_palette)], text=values))
+            color = status_colors.get(status, fallback_palette[i % len(fallback_palette)])
+            fig.add_trace(go.Bar(
+                y=offences, x=values, name=status, orientation='h',
+                marker_color=color, text=values,
+                customdata=[status] * len(values),
+            ))
         if not status_columns:
             st.info('No case status columns available for charting.')
         else:
             # Increase chart height for larger row sets
-            fig.update_layout(barmode='stack', height=500, margin=dict(l=0, r=0, t=10, b=10), legend=dict(orientation='h', y=-0.2), xaxis_title='Case Count', yaxis_title='Offence Group')
-            st.plotly_chart(fig, width='stretch')
+            fig.update_layout(barmode='stack', height=500, margin=dict(l=0, r=0, t=10, b=10), legend=dict(orientation='h', y=-0.2, traceorder='normal'), xaxis_title='Case Count', yaxis_title='Offence Group')
+            event = st.plotly_chart(fig, width='stretch', on_select="rerun", key="case_offence_chart")
+
+            # Show yearly trend line chart when a bar is clicked
+            selected_offence = None
+            if event and event.selection and event.selection.points:
+                point = event.selection.points[0]
+                selected_offence = point.get('y', None)
+
+            if selected_offence and not yearly_df.empty:
+                show_trend = st.checkbox("Show Yearly Trend", value=True, key="show_trend_toggle")
+                if show_trend:
+                    trend_data = yearly_df[yearly_df['offence_type'] == selected_offence]
+                    if not trend_data.empty:
+                        trend_pivot = trend_data.pivot_table(index='year', columns='case_status', values='case_count', aggfunc='sum', fill_value=0)
+                        trend_pivot = trend_pivot.sort_index()
+                        fig_trend = go.Figure()
+                        for cs in [s for s in status_order if s in trend_pivot.columns]:
+                            fig_trend.add_trace(go.Scatter(
+                                x=trend_pivot.index,
+                                y=trend_pivot[cs],
+                                mode='lines+markers',
+                                name=cs,
+                                line=dict(color=status_colors.get(cs, '#666')),
+                                marker=dict(size=6),
+                            ))
+                        fig_trend.update_layout(
+                            title=f'Yearly Trend — {selected_offence}',
+                            height=300,
+                            margin=dict(l=0, r=0, t=40, b=10),
+                            xaxis_title='Year',
+                            yaxis_title='Case Count',
+                            xaxis=dict(type='category'),
+                            legend=dict(orientation='h', y=-0.3, x=0.5, xanchor='center', traceorder='normal'),
+                        )
+                        st.plotly_chart(fig_trend, width='stretch')
     else:
         st.info('No offence distribution data available yet.')
 
@@ -374,6 +583,8 @@ def show_prosecution_trends():
     # Load data for PG and Trial charts with same metric and filters
     pg_df = load_case_hearing_days(case_type='PG', selected_clusters=selected_clusters, selected_years=selected_years, metric=pg_metric, court_event_types=event_type_filter)
     trial_df = load_case_hearing_days(case_type='Trial', selected_clusters=selected_clusters, selected_years=selected_years, metric=pg_metric, court_event_types=event_type_filter)
+    pg_yearly_df = load_yearly_hearing_days(case_type='PG', selected_clusters=selected_clusters, selected_years=selected_years, metric=pg_metric, court_event_types=event_type_filter)
+    trial_yearly_df = load_yearly_hearing_days(case_type='Trial', selected_clusters=selected_clusters, selected_years=selected_years, metric=pg_metric, court_event_types=event_type_filter)
 
     with sc1:
         st.write("**PG Cases**")
@@ -411,7 +622,23 @@ def show_prosecution_trends():
                 legend=dict(orientation='h', y=-0.25, x=0.5, xanchor='center', traceorder='normal'),
                 yaxis=dict(categoryorder='array', categoryarray=pg_pivot['offence_group'].tolist())
             )
-            st.plotly_chart(fig_pg, width='stretch')
+            pg_event = st.plotly_chart(fig_pg, width='stretch', on_select='rerun', key='pg_chart')
+
+            pg_selected = None
+            if pg_event and pg_event.selection and pg_event.selection.points:
+                pg_selected = pg_event.selection.points[0].get('y', None)
+            if pg_selected and not pg_yearly_df.empty:
+                show_pg_trend = st.checkbox('Show Yearly Trend', value=True, key='show_pg_trend')
+                if show_pg_trend:
+                    pg_trend = pg_yearly_df[pg_yearly_df['offence_group'] == pg_selected]
+                    if not pg_trend.empty:
+                        pg_tp = pg_trend.pivot_table(index='year', columns='segment', values='hearing_days', aggfunc='sum', fill_value=0).sort_index()
+                        fig_pg_t = go.Figure()
+                        for seg in pg_order:
+                            if seg in pg_tp.columns:
+                                fig_pg_t.add_trace(go.Scatter(x=pg_tp.index, y=pg_tp[seg], mode='lines+markers', name=seg, line=dict(color=pg_colors.get(seg, '#666')), marker=dict(size=6)))
+                        fig_pg_t.update_layout(title=f'PG Yearly Trend — {pg_selected}', height=300, margin=dict(l=0, r=0, t=40, b=10), xaxis_title='Year', yaxis_title=pg_metric, xaxis=dict(type='category'), legend=dict(orientation='h', y=-0.3, x=0.5, xanchor='center', traceorder='normal'))
+                        st.plotly_chart(fig_pg_t, width='stretch')
 
     with sc2:
         st.write("**Trial Cases**")
@@ -448,7 +675,23 @@ def show_prosecution_trends():
                 legend=dict(orientation='h', y=-0.25, x=0.5, xanchor='center', traceorder='normal'),
                 yaxis=dict(categoryorder='array', categoryarray=trial_pivot['offence_group'].tolist())
             )
-            st.plotly_chart(fig_tr, width='stretch')
+            tr_event = st.plotly_chart(fig_tr, width='stretch', on_select='rerun', key='trial_chart')
+
+            tr_selected = None
+            if tr_event and tr_event.selection and tr_event.selection.points:
+                tr_selected = tr_event.selection.points[0].get('y', None)
+            if tr_selected and not trial_yearly_df.empty:
+                show_tr_trend = st.checkbox('Show Yearly Trend', value=True, key='show_trial_trend')
+                if show_tr_trend:
+                    tr_trend = trial_yearly_df[trial_yearly_df['offence_group'] == tr_selected]
+                    if not tr_trend.empty:
+                        tr_tp = tr_trend.pivot_table(index='year', columns='segment', values='hearing_days', aggfunc='sum', fill_value=0).sort_index()
+                        fig_tr_t = go.Figure()
+                        for seg in trial_order:
+                            if seg in tr_tp.columns:
+                                fig_tr_t.add_trace(go.Scatter(x=tr_tp.index, y=tr_tp[seg], mode='lines+markers', name=seg, line=dict(color=trial_colors.get(seg, '#666')), marker=dict(size=6)))
+                        fig_tr_t.update_layout(title=f'Trial Yearly Trend — {tr_selected}', height=300, margin=dict(l=0, r=0, t=40, b=10), xaxis_title='Year', yaxis_title=pg_metric, xaxis=dict(type='category'), legend=dict(orientation='h', y=-0.3, x=0.5, xanchor='center', traceorder='normal'))
+                        st.plotly_chart(fig_tr_t, width='stretch')
 
 def show_workload_overview():
     st.markdown('<div class="main-header">COURT CASES WORKLOAD DISTRIBUTION OVERVIEW</div>', unsafe_allow_html=True)
