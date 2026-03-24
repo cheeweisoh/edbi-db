@@ -29,9 +29,9 @@ base AS (
         _bronze_loaded_at,
         current_timestamp() AS _silver_qa_loaded_at,
 
-        -- quality flags
-        CASE WHEN officer_name IS NULL THEN false ELSE true END AS _dq_missing_officer_name,
-        CASE WHEN _rescued_data IS NOT NULL THEN false ELSE true END AS _dq_rescued_data
+        -- quality flags (true = passes quality check, false = fails)
+        CASE WHEN officer_name IS NOT NULL THEN true ELSE false END AS _dq_missing_officer_name,
+        CASE WHEN _rescued_data IS NULL THEN true ELSE false END AS _dq_rescued_data
     FROM {{ ref('cmplx_criliti_sc_assigned_lo') }} src
     {% if is_incremental() %}
     CROSS JOIN max_loaded_at

@@ -5,7 +5,7 @@
         target_schema='snapshots',
         unique_key=['case_pid', 'officer_id'],
         strategy='check',
-        check_cols=['officer_name', 'cluster', 'team', '_file_date'],
+        check_cols=['officer_name', 'cluster', 'team'],
         invalidate_hard_deletes=True
     )
 }}
@@ -13,7 +13,7 @@
 WITH ranked AS (
    SELECT
         *,
-        row_number() OVER (PARTITION BY case_pid ORDER BY _file_date DESC) rn
+        row_number() OVER (PARTITION BY case_pid, officer_id ORDER BY _file_date DESC) rn
    FROM {{ ref('qa_cmplx_criliti_sc_assigned_lo') }}
    WHERE is_valid_row = true
  )

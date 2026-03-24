@@ -19,6 +19,10 @@ updated_cases AS (
     SELECT case_pid
     FROM {{ ref('qa_cmplx_criliti_sc_assigned_lo') }}
     WHERE _bronze_loaded_at > (SELECT cutoff_bronze_loaded_at FROM max_loaded_at)
+    UNION
+    SELECT case_pid
+    FROM {{ ref('qa_tb_criliti_sc_court_events') }}
+    WHERE _bronze_loaded_at > (SELECT cutoff_bronze_loaded_at FROM max_loaded_at)
 ),
 {% endif %}
 
