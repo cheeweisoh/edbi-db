@@ -16,3 +16,4 @@ __pycache__/
 *.bak
 *.backup
 /data
+/.user.yml
