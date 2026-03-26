@@ -16,6 +16,8 @@ models:
         description: "Number of cases matching the group dimensions"
       - name: currently_assigned_count
         description: "Number of cases currently assigned to the officer (no end date)"
+      - name: case_disposition_date
+        description: "Date of case disposition (if applicable)"
       - name: case_processing_days
         description: "Number of days between first mention date and case disposition date"
 
