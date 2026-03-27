@@ -477,7 +477,7 @@ def load_case_hearing_days(case_type: str = 'PG', selected_clusters: Optional[Li
 
 def show_prosecution_trends():
     st.markdown('<div class="main-header">PROSECUTION TRENDS</div>', unsafe_allow_html=True)
-    col1, col2, _ = st.columns([1, 1, 3])
+    col1, col2, col3, _ = st.columns([1, 1, 1, 2])
     st.markdown('<div class="sub-header">Number of Cases by Offence Type and Case Status</div>', unsafe_allow_html=True)
     clusters, years = get_filter_values()
     selected_cluster = col1.multiselect("CLUSTER FILTER", clusters, default=[clusters[0]] if clusters else [], key="cluster_filter", label_visibility="collapsed")
@@ -486,8 +486,19 @@ def show_prosecution_trends():
     selected_clusters = [] if not selected_cluster or "All Clusters" in selected_cluster else selected_cluster
     selected_years = [] if not selected_year or "All Years" in selected_year else selected_year
 
+    # Load full data first to extract offence group options
     df = load_case_offence_distribution(selected_clusters=selected_clusters, selected_months=selected_years)
+    offence_options = ["All Offence Groups"] + sorted(df['offence_type'].dropna().unique().tolist()) if not df.empty else ["All Offence Groups"]
+    selected_offence_groups = col3.multiselect("OFFENCE GROUP FILTER", offence_options, default=["All Offence Groups"], key="offence_group_filter", label_visibility="collapsed")
+    active_offence_groups = [] if not selected_offence_groups or "All Offence Groups" in selected_offence_groups else selected_offence_groups
+
+    # Filter data by selected offence groups
+    if active_offence_groups and not df.empty:
+        df = df[df['offence_type'].isin(active_offence_groups)]
+
     yearly_df = load_yearly_case_distribution(selected_clusters=selected_clusters, selected_months=selected_years)
+    if active_offence_groups and not yearly_df.empty:
+        yearly_df = yearly_df[yearly_df['offence_type'].isin(active_offence_groups)]
 
     if not df.empty:
         pivot = df.pivot_table(index='offence_type', columns='case_status', values='case_count', aggfunc='sum', fill_value=0)
@@ -585,6 +596,17 @@ def show_prosecution_trends():
     trial_df = load_case_hearing_days(case_type='Trial', selected_clusters=selected_clusters, selected_years=selected_years, metric=pg_metric, court_event_types=event_type_filter)
     pg_yearly_df = load_yearly_hearing_days(case_type='PG', selected_clusters=selected_clusters, selected_years=selected_years, metric=pg_metric, court_event_types=event_type_filter)
     trial_yearly_df = load_yearly_hearing_days(case_type='Trial', selected_clusters=selected_clusters, selected_years=selected_years, metric=pg_metric, court_event_types=event_type_filter)
+
+    # Apply offence group filter to hearing days data
+    if active_offence_groups:
+        if not pg_df.empty:
+            pg_df = pg_df[pg_df['offence_group'].isin(active_offence_groups)]
+        if not trial_df.empty:
+            trial_df = trial_df[trial_df['offence_group'].isin(active_offence_groups)]
+        if not pg_yearly_df.empty:
+            pg_yearly_df = pg_yearly_df[pg_yearly_df['offence_group'].isin(active_offence_groups)]
+        if not trial_yearly_df.empty:
+            trial_yearly_df = trial_yearly_df[trial_yearly_df['offence_group'].isin(active_offence_groups)]
 
     with sc1:
         st.write("**PG Cases**")
