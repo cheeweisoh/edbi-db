@@ -2,7 +2,7 @@ version: 2
 
 sources:
   - name: landing
-    database: edbi_teamg01
+    catalog: edbi_teamg01
     schema: landing
     tables:
       - name: ext_criliti_sc

@@ -5,7 +5,7 @@ databricks:
       type: databricks
       catalog: edbi_teamg01
       schema: default
-      host: dbc-fdf165e1-e5b0.cloud.databricks.com
-      http_path: /sql/1.0/warehouses/a915d47ab9a08deb
+      host: dbc-3464b9f1-f754.cloud.databricks.com
+      http_path: /sql/1.0/warehouses/9f2c5beec7542d75
       token: "{{ env_var('DATABRICKS_TOKEN') }}"
       threads: 1

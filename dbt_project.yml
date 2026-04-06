@@ -20,10 +20,10 @@ snapshot-paths: ["snapshots"]
 seeds:
   edbi:
     config:
-      +database: edbi_teamg01
+      +catalog: edbi_teamg01
       +schema: config
     reference:
-      +database: edbi_teamg01
+      +catalog: edbi_teamg01
       +schema: reference
 
 models:
@@ -32,22 +32,22 @@ models:
       relation: true
       columns: true
     bronze:
-      +database: edbi_teamg01
+      +catalog: edbi_teamg01
       +schema: bronze
       +materialized: incremental
       +tags: ["bronze"]
     silver:
-      +database: edbi_teamg01
+      +catalog: edbi_teamg01
       +schema: silver
       +materialized: incremental
       +tags: ["silver"]
     gold:
-      +database: edbi_teamg01
+      +catalog: edbi_teamg01
       +schema: gold
       +materialized: table
       +tags: ["gold"]
 
 snapshots:
   edbi:
-    +target_database: edbi_teamg01
+    +target_catalog: edbi_teamg01
     +target_schema: silver

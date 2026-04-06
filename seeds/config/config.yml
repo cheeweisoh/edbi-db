@@ -3,7 +3,7 @@ version: 2
 seeds:
   - name: metadata_tables
     config:
-      database: edbi_teamg01
+      catalog: edbi_teamg01
       schema: config
       meta:
         contract:
@@ -52,7 +52,7 @@ seeds:
           - not_null
   - name: metadata_columns
     config:
-      database: edbi_teamg01
+      catalog: edbi_teamg01
       schema: config
       meta:
         contract:
