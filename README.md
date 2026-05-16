@@ -1,6 +1,6 @@
-# edbi-db
+# EDBI Data Warehouse
 
-A data engineering platform built on **dbt** and **Databricks**, implementing a medallion architecture for the EDBI analytics project. Includes data transformation pipelines and Streamlit dashboards for court operations and prosecution analytics.
+A data warehouse built on **dbt** and **Databricks**, implementing a medallion architecture for the EDBI analytics project. Includes data transformation pipelines and Streamlit dashboards for court operations and prosecution analytics.
 
 ## Architecture
 
